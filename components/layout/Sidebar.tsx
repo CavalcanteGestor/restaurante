@@ -48,7 +48,7 @@ export default function Sidebar({ userRole = 'recepcionista' }: SidebarProps) {
   const navigation = userRole === 'admin' ? adminNavigation : recepcionistaNavigation
 
   return (
-    <div className="w-72 bg-gradient-to-b from-[#F5F0E8] via-white to-[#F5F0E8]/80 border-r-2 border-[#8B2E3D]/20 min-h-screen flex flex-col shadow-rustic-lg bg-rustic-texture">
+    <div className="hidden md:flex w-72 bg-gradient-to-b from-[#F5F0E8] via-white to-[#F5F0E8]/80 border-r-2 border-[#8B2E3D]/20 min-h-screen flex-col shadow-rustic-lg bg-rustic-texture">
       {/* Logo Section */}
       <div className="p-6 border-b-2 border-[#8B2E3D]/20 bg-gradient-to-br from-white via-[#F5F0E8]/50 to-white">
         <div className="flex flex-col items-center gap-4">

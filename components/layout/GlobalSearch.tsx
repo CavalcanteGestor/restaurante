@@ -20,7 +20,11 @@ interface SearchResult {
   href: string
 }
 
-export default function GlobalSearch() {
+interface GlobalSearchProps {
+  mobile?: boolean
+}
+
+export default function GlobalSearch({ mobile = false }: GlobalSearchProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -72,16 +76,25 @@ export default function GlobalSearch() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#8B2E3D]/20 hover:border-[#8B2E3D]/40 transition-colors bg-white"
-      >
-        <Search className="h-4 w-4 text-gray-500" />
-        <span className="text-sm text-gray-600">Buscar...</span>
-        <kbd className="ml-auto px-2 py-0.5 text-xs font-semibold text-gray-500 bg-gray-100 rounded">
-          ⌘K
-        </kbd>
-      </button>
+      {mobile ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 rounded-xl border-2 border-[#8B2E3D]/20 hover:border-[#8B2E3D]/40 transition-colors bg-white"
+        >
+          <Search className="h-5 w-5 text-[#8B2E3D]/70" />
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#8B2E3D]/20 hover:border-[#8B2E3D]/40 transition-colors bg-white"
+        >
+          <Search className="h-4 w-4 text-gray-500" />
+          <span className="text-sm text-gray-600">Buscar...</span>
+          <kbd className="ml-auto px-2 py-0.5 text-xs font-semibold text-gray-500 bg-gray-100 rounded">
+            ⌘K
+          </kbd>
+        </button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
