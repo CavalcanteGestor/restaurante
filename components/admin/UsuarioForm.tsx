@@ -19,9 +19,11 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, Loader2, User, Mail, Phone, Shield, Lock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Database } from "@/types/database"
 
-type Funcao = Database['public']['Tables']['funcoes']['Row']
+type Funcao = {
+  id: string
+  nome: string
+}
 
 interface UsuarioFormProps {
   funcoes: Funcao[]
@@ -34,9 +36,7 @@ const baseUsuarioSchema = z.object({
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
   telefone: z.string().optional(),
-  tipo: z.enum(["admin", "recepcionista"], {
-    errorMap: () => ({ message: "Tipo é obrigatório" }),
-  }),
+  tipo: z.enum(["admin", "recepcionista"]),
   funcao_id: z.string().optional(),
   status: z.boolean().default(true),
 })
@@ -50,8 +50,6 @@ const createUsuarioSchema = baseUsuarioSchema.extend({
 const editUsuarioSchema = baseUsuarioSchema.extend({
   senha: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional().or(z.literal("")),
 })
-
-type UsuarioFormData = z.infer<typeof usuarioSchema>
 
 export default function UsuarioForm({ funcoes, usuario, isEdit = false }: UsuarioFormProps) {
   const router = useRouter()
@@ -69,7 +67,7 @@ export default function UsuarioForm({ funcoes, usuario, isEdit = false }: Usuari
     setValue,
     watch,
   } = useForm<UsuarioFormData>({
-    resolver: zodResolver(usuarioSchema),
+    resolver: zodResolver(usuarioSchema) as any,
     defaultValues: usuario ? {
       nome: usuario.nome,
       email: usuario.email,

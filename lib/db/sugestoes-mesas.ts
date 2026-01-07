@@ -145,9 +145,9 @@ export async function getSugestoesMesas(
   // 3. Buscar combinações dinâmicas baseadas em junta_com
   mesasDisponiveis.forEach((mesa) => {
     if (mesa.pode_juntar && mesa.junta_com) {
-      const mesasParaJuntar = mesa.junta_com.split(',').map((m) => m.trim())
+      const mesasParaJuntar = mesa.junta_com.split(',').map((m: string) => m.trim())
       
-      mesasParaJuntar.forEach((codigoCombinacao) => {
+      mesasParaJuntar.forEach((codigoCombinacao: string) => {
         const mesaCombinacao = mesasDisponiveis.find((m) => m.codigo === codigoCombinacao)
         
         // Verificar se ambas as mesas estão disponíveis e não ocupadas

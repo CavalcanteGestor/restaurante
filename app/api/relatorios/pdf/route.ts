@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getReservas } from "@/lib/db/reservas"
+import { getReservasByDateRange } from "@/lib/db/reservas"
 
 /**
  * GET /api/relatorios/pdf?periodo=mes&mes=01&ano=2026
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       dataFim = hoje
     }
 
-    const reservas = await getReservas({ dataInicio, dataFim })
+    const reservas = await getReservasByDateRange(dataInicio, dataFim)
 
     const totalReservas = reservas.length
     const confirmadas = reservas.filter(r => r.etapa === 'confirmado').length

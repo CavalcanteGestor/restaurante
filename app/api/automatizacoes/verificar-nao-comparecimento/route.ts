@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Buscar reservas de hoje que ainda estão agendadas
     const { data: reservas, error } = await supabase
       .from('reservas')
-      .select('id, nome, telefone, data_reserva, horario_reserva, status_comparecimento')
+      .select('id, nome, telefone, data_reserva, horario_reserva, status_comparecimento, numero_pessoas, mesas')
       .eq('data_reserva', hoje)
       .or('status_comparecimento.is.null,status_comparecimento.eq.agendado')
       .in('etapa', ['reserva_confirmada', 'confirmado', 'interesse', 'pendente'])

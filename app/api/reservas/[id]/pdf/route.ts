@@ -165,11 +165,8 @@ export async function GET(
         <div class="info-value">${reserva.numero_pessoas} ${reserva.numero_pessoas === 1 ? 'pessoa' : 'pessoas'}</div>
       </div>
       <div class="info-row">
-        <div class="info-label">Tipo de Uso:</div>
-        <div class="info-value">${
-          reserva.tipo_uso === 'pessoal' ? 'Pessoal' :
-          reserva.tipo_uso === 'corporativo' ? 'Corporativo' : 'Evento'
-        }</div>
+        <div class="info-label">Turno:</div>
+        <div class="info-value">${reserva.turno || 'N/A'}</div>
       </div>
       ${reserva.mesas ? `
       <div class="info-row">

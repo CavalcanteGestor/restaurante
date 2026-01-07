@@ -47,29 +47,29 @@ export default async function MensagensAutomaticasPage({
             icon={Send}
             title="Total Enviadas"
             value={statsTotal.enviadas.toString()}
-            description="Mensagens enviadas com sucesso"
-            color="blue"
+            subtitle="Mensagens enviadas com sucesso"
+            color="info"
           />
           <StatsCard
             icon={CheckCircle2}
             title="Hoje"
             value={statsHoje.enviadas.toString()}
-            description="Mensagens enviadas hoje"
-            color="green"
+            subtitle="Mensagens enviadas hoje"
+            color="success"
           />
           <StatsCard
             icon={XCircle}
             title="Erros"
             value={statsTotal.erros.toString()}
-            description="Mensagens com erro no envio"
-            color="red"
+            subtitle="Mensagens com erro no envio"
+            color="warning"
           />
           <StatsCard
             icon={Clock}
             title="Total"
             value={statsTotal.total.toString()}
-            description="Total de mensagens registradas"
-            color="purple"
+            subtitle="Total de mensagens registradas"
+            color="primary"
           />
         </div>
 

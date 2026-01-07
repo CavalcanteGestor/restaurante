@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { getLeadByTelefone } from "@/lib/db/leads"
-import { getConversasByTelefone } from "@/lib/db/conversas"
 import { getReservas } from "@/lib/db/reservas"
 import ChatInterface from "@/components/whatsapp/ChatInterface"
 import { notFound } from "next/navigation"
+import type { WhatsAppMessage } from "@/components/whatsapp/ChatInterface"
 
 export default async function ChatPage({
   params,
@@ -15,7 +15,6 @@ export default async function ChatPage({
   const supabase = await createClient()
   
   const lead = await getLeadByTelefone(telefoneDecoded)
-  const conversas = await getConversasByTelefone(telefoneDecoded)
   const reservas = await getReservas({ telefone: telefoneDecoded })
 
   // Verificar se está em atendimento humano
@@ -30,6 +29,9 @@ export default async function ChatPage({
   if (!lead) {
     notFound()
   }
+
+  // Conversas vazias inicialmente - o ChatInterface carrega via API
+  const conversas: WhatsAppMessage[] = []
 
   return (
     <div className="h-[calc(100vh-200px)]">

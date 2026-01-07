@@ -19,7 +19,10 @@ import {
 } from "@/components/ui/alert-dialog"
 
 type Usuario = Database['public']['Tables']['usuarios']['Row']
-type Funcao = Database['public']['Tables']['funcoes']['Row']
+type Funcao = {
+  id: string
+  nome: string
+}
 
 interface UsuarioComFuncao extends Usuario {
   funcao_nome?: string

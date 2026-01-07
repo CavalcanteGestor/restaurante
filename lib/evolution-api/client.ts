@@ -66,7 +66,7 @@ class EvolutionApiClient {
         if (instance?.id) {
           this.instanceId = instance.id
           console.log(`[Evolution API] ID da instância "${this.instanceName}": ${this.instanceId}`)
-          return this.instanceId
+          return this.instanceId as string
         }
       }
     } catch (error) {

@@ -273,9 +273,9 @@ export default function ChatInterface({
                     <p className="text-sm text-gray-700">
                       <strong>{reserva.numero_pessoas}</strong> pessoas • {reserva.turno}
                     </p>
-                    {reserva.observacao && (
-                      <p className="text-xs text-gray-500 mt-1">{reserva.observacao}</p>
-                    )}
+                     {reserva.contexto && (
+                       <p className="text-xs text-gray-500 mt-1">{reserva.contexto}</p>
+                     )}
                   </Card>
                 ))}
               </div>

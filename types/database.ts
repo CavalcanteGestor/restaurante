@@ -22,6 +22,7 @@ export type Database = {
           created_at: string | null
           turno: string | null
           mesas: string | null
+          status_comparecimento: string | null
         }
         Insert: {
           id?: string
@@ -35,6 +36,7 @@ export type Database = {
           created_at?: string | null
           turno?: string | null
           mesas?: string | null
+          status_comparecimento?: string | null
         }
         Update: {
           id?: string
@@ -48,6 +50,7 @@ export type Database = {
           created_at?: string | null
           turno?: string | null
           mesas?: string | null
+          status_comparecimento?: string | null
         }
       }
       mesas: {
