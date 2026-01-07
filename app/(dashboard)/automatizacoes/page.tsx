@@ -11,19 +11,19 @@ export default async function AutomatizacoesPage() {
   const reservasAtrasadas = await getReservasAtrasadas()
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-4 md:space-y-8 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#8B2E3D] to-[#7A1F2E] bg-clip-text text-transparent flex items-center gap-3">
-            <Zap className="h-10 w-10 text-[#8B2E3D]" />
+          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-[#8B2E3D] to-[#7A1F2E] bg-clip-text text-transparent flex items-center gap-2 md:gap-3">
+            <Zap className="h-6 w-6 md:h-10 md:w-10 text-[#8B2E3D]" />
             Automatizações
           </h1>
-          <p className="text-gray-600 mt-2 text-lg">
+          <p className="text-gray-600 mt-2 text-sm md:text-lg">
             Sistema de mensagens automáticas
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <Link href="/automatizacoes/configurar-mensagens">
             <Button variant="outline" className="border-[#8B2E3D] text-[#8B2E3D] hover:bg-[#8B2E3D] hover:text-white gap-2">
               <Settings className="h-5 w-5" />
@@ -90,27 +90,27 @@ export default async function AutomatizacoesPage() {
               {reservasAtrasadas.map((reserva) => (
                 <div
                   key={reserva.id}
-                  className="flex items-center justify-between p-5 border-2 border-red-200 rounded-lg hover:border-red-300 hover:bg-red-50/50 transition-all bg-white"
+                  className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-5 border-2 border-red-200 rounded-lg hover:border-red-300 hover:bg-red-50/50 transition-all bg-white gap-3"
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <AlertCircle className="h-6 w-6 text-red-600" />
+                  <div className="flex items-center gap-3 md:gap-4 flex-1 w-full md:w-auto">
+                    <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold text-base">{reserva.nome}</p>
-                        <Badge className="bg-red-100 text-red-800 border-red-200">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                        <p className="font-semibold text-sm md:text-base truncate">{reserva.nome}</p>
+                        <Badge className="bg-red-100 text-red-800 border-red-200 text-xs w-fit">
                           Atrasada
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs md:text-sm text-gray-600">
                         <span>{formatDate(reserva.data_reserva)} às {formatTime(reserva.horario_reserva)}</span>
-                        <span>•</span>
-                        <span className="font-mono">{reserva.telefone}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="font-mono truncate">{reserva.telefone}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full md:w-auto">
                     <Link href={`/whatsapp/${reserva.telefone}`}>
                       <Button variant="outline" size="sm" className="gap-2">
                         <Send className="h-4 w-4" />

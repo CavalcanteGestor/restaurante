@@ -216,16 +216,16 @@ export default function WhatsAppPage() {
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col">
       {/* Header */}
-      <div className="border-b-2 border-[#8B2E3D]/20 bg-white p-4">
-        <div className="flex items-center justify-between">
+      <div className="border-b-2 border-[#8B2E3D]/20 bg-white p-3 md:p-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-serif font-bold text-[#8B2E3D] flex items-center gap-3">
-              <Phone className="h-8 w-8" />
+            <h1 className="text-xl md:text-2xl font-serif font-bold text-[#8B2E3D] flex items-center gap-2 md:gap-3">
+              <Phone className="h-6 w-6 md:h-8 md:w-8" />
               WhatsApp
             </h1>
-            <p className="text-[#8B2E3D]/70 text-sm mt-1">Atendimento via WhatsApp</p>
+            <p className="text-[#8B2E3D]/70 text-xs md:text-sm mt-1">Atendimento via WhatsApp</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
             <Button
               onClick={carregarConversas}
               variant="outline"
@@ -241,9 +241,9 @@ export default function WhatsAppPage() {
       </div>
 
       {/* Main Content - Layout WhatsApp Web */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Lista de Conversas (Esquerda) */}
-        <div className="w-96 border-r-2 border-[#8B2E3D]/20 bg-[#F5F0E8]/30 flex flex-col">
+        <div className={`${telefoneSelecionado ? 'hidden md:flex' : 'flex'} w-full md:w-96 border-r-2 border-[#8B2E3D]/20 bg-[#F5F0E8]/30 flex-col`}>
           {/* Busca */}
           <div className="p-4 border-b border-[#8B2E3D]/10">
             <div className="relative">
@@ -380,17 +380,31 @@ export default function WhatsAppPage() {
         </div>
 
         {/* Área de Chat (Direita) */}
-        <div className="flex-1 flex flex-col bg-white">
+        <div className={`${telefoneSelecionado ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white`}>
           {telefoneSelecionado && leadAtivo ? (
-            <ChatInterface
-              lead={leadAtivo}
-              conversas={conversasMensagens}
-              reservas={reservas}
-              telefone={telefoneSelecionado}
-              remoteJid={conversaAtiva?.remoteJid}
-              atendimentoHumanoAtivo={conversaAtiva?.atendimentoHumano || false}
-              profilePicUrl={conversaAtiva?.profilePicUrl || null}
-            />
+            <>
+              {/* Botão Voltar Mobile */}
+              <div className="md:hidden border-b border-[#8B2E3D]/20 p-3 bg-white">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/whatsapp')}
+                  className="gap-2 text-[#8B2E3D]"
+                >
+                  <Phone className="h-4 w-4 rotate-180" />
+                  Voltar
+                </Button>
+              </div>
+              <ChatInterface
+                lead={leadAtivo}
+                conversas={conversasMensagens}
+                reservas={reservas}
+                telefone={telefoneSelecionado}
+                remoteJid={conversaAtiva?.remoteJid}
+                atendimentoHumanoAtivo={conversaAtiva?.atendimentoHumano || false}
+                profilePicUrl={conversaAtiva?.profilePicUrl || null}
+              />
+            </>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#F5F0E8] to-white">
               <div className="text-center p-8">

@@ -41,15 +41,15 @@ export default async function RelatoriosPage({
   const reservasJantar = reservasPeriodo.filter((r) => r.turno === "jantar").length
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-4 md:space-y-8 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#8B2E3D] to-[#7A1F2E] bg-clip-text text-transparent flex items-center gap-3">
-            <BarChart3 className="h-10 w-10 text-[#8B2E3D]" />
+          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-[#8B2E3D] to-[#7A1F2E] bg-clip-text text-transparent flex items-center gap-2 md:gap-3">
+            <BarChart3 className="h-6 w-6 md:h-10 md:w-10 text-[#8B2E3D]" />
             Relatórios
           </h1>
-          <p className="text-gray-600 mt-2 text-lg">
+          <p className="text-gray-600 mt-2 text-sm md:text-lg">
             Análise e métricas do sistema
           </p>
         </div>

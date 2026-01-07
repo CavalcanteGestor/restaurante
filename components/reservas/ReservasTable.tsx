@@ -65,8 +65,88 @@ const ReservasTable = memo(function ReservasTable({ reservas }: ReservasTablePro
         />
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {filteredReservas.length === 0 ? (
+          <div className="text-center p-12">
+            <Calendar className="h-12 w-12 text-gray-600 mx-auto mb-4 opacity-70" />
+            <p className="text-gray-600 font-medium">Nenhuma reserva encontrada</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {filter ? "Tente ajustar os filtros de busca" : "Crie sua primeira reserva"}
+            </p>
+          </div>
+        ) : (
+          filteredReservas.map((reserva) => (
+            <div
+              key={reserva.id}
+              className="bg-white border-2 border-gray-200 rounded-lg p-4 space-y-3 shadow-sm"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 text-lg">{reserva.nome}</h3>
+                  <p className="text-sm text-gray-600 font-mono mt-1">{reserva.telefone}</p>
+                </div>
+                {getStatusBadge(reserva.etapa, reserva.data_reserva, reserva.horario_reserva)}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-1 text-gray-700">
+                  <Calendar className="h-4 w-4" />
+                  {formatDate(reserva.data_reserva)}
+                </div>
+                <div className="flex items-center gap-1 text-gray-700">
+                  <Clock className="h-4 w-4" />
+                  {formatTime(reserva.horario_reserva)}
+                </div>
+                <div className="flex items-center gap-1 text-gray-700">
+                  <Users className="h-4 w-4" />
+                  {reserva.numero_pessoas} pessoas
+                </div>
+                {reserva.mesas && (
+                  <div className="text-gray-700">
+                    <Badge variant="outline" className="font-mono text-xs bg-blue-50 text-blue-700 border-blue-300">
+                      {reserva.mesas}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-gray-200">
+                <StatusComparecimento
+                  reservaId={reserva.id}
+                  statusAtual={(reserva as any).status_comparecimento || 'agendado'}
+                  nomeCliente={reserva.nome}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                <Link href={`/reservas/${reserva.id}`} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Ver Detalhes
+                  </Button>
+                </Link>
+                <Link href={`/whatsapp/${reserva.telefone}`}>
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                </Link>
+                {reserva.etapa !== 'cancelado' && (
+                  <CancelarReserva
+                    reservaId={reserva.id}
+                    nomeCliente={reserva.nome}
+                    dataReserva={reserva.data_reserva}
+                    horarioReserva={reserva.horario_reserva}
+                  />
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b">

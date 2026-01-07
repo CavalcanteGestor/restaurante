@@ -35,8 +35,8 @@ export default async function ReservasPage({
   const canceladas = reservas.filter(r => r.etapa === 'cancelado').length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#F5F0E8]/50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#F5F0E8]/50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-8">
         {/* Header */}
         <PageHeader
           icon={Calendar}
