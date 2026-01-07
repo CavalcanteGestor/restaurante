@@ -1,15 +1,25 @@
 # Configuração do Cron Job para Mensagens Automáticas
 
+## ⚠️ IMPORTANTE: Limitação Vercel Hobby
+
+**Contas Hobby (gratuitas) na Vercel:**
+- ✅ Máximo: **1 execução por dia**
+- ❌ Não pode executar a cada 5 minutos
+
+**Solução:** Use n8n ou VPS para execução mais frequente (veja opções abaixo)
+
 ## Opções de Configuração
 
-### 1. Vercel Cron (Recomendado)
+### 1. Vercel Cron (1x por dia - Plano Hobby)
 
-Se você está usando Vercel, o arquivo `vercel.json` já está configurado para executar a cada 5 minutos.
+O arquivo `vercel.json` está configurado para executar **1 vez por dia às 9h**.
 
 **Configuração:**
 - O cron job está configurado em `vercel.json`
-- Executa a cada 5 minutos: `*/5 * * * *`
+- Executa 1x por dia às 9h: `0 9 * * *`
 - Endpoint: `/api/cron/verificar-mensagens`
+
+**Para execução mais frequente (a cada 5 minutos), use n8n ou VPS (veja abaixo)**
 
 **Autenticação:**
 Adicione no `.env.local`:
