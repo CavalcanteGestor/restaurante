@@ -4,6 +4,9 @@ import { MessageSquare, Settings } from "lucide-react"
 import { getAllConfiguracoesMensagens } from "@/lib/db/configuracoes-mensagens"
 import ConfigurarMensagem from "@/components/automatizacoes/ConfigurarMensagem"
 
+// Forçar renderização dinâmica porque usa cookies (Supabase)
+export const dynamic = 'force-dynamic'
+
 export default async function ConfigurarMensagensPage() {
   let configuracoes: any[] = []
   let configNaoComparecimento: any = null
