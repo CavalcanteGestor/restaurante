@@ -1,0 +1,531 @@
+{
+  "name": "MCPBISTRO",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "mcpsaas"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -3728,
+        2368
+      ],
+      "id": "5917e6ff-6ac7-4450-8f0f-615ee95b700c",
+      "name": "MCPSAAS",
+      "webhookId": "5b06ed4f-2e67-4b58-9d51-887996e1b1ab"
+    },
+    {
+      "parameters": {
+        "path": "bistro"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -4336,
+        2448
+      ],
+      "id": "61f7091a-d0f5-4bf6-8a0f-d4120f8a94cb",
+      "name": "MCPBistro",
+      "webhookId": "5b06ed4f-2e67-4b58-9d51-887996e1b1ab"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Lista todas as mesas disponíveis do restaurante com suas características e regras de uso. Use SEMPRE antes de sugerir uma mesa ao cliente.\n\nRetorna: Array de objetos contendo:\n- id: ID da mesa\n- numero: Número da mesa (ex: 'Mesa 1', 'Mesa 9')\n- capacidade: Número de lugares\n- tipo: Tipo de mesa (ex: 'externa', 'interna', 'sala')\n- pode_juntar: Se pode ser unida com outras mesas (true/false)\n- mesas_compativel: Array de números de mesas que podem ser unidas\n- uso_pessoal: Se é apenas para uso pessoal (true/false)\n- uso_corporativo: Se aceita eventos corporativos (true/false)\n- tem_tv: Se tem TV/mídia (true/false)\n- ativo: Se está ativa (true/false)\n\nParâmetros: Nenhum. Chame sem parâmetros para obter todas as mesas.\n\nExemplo de uso: listar_mesas()\n\nIMPORTANTE: Use esta tool antes de sugerir qualquer mesa ao cliente para garantir que está disponível e compatível.",
+        "operation": "getAll",
+        "tableId": "mesas",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -4544,
+        2768
+      ],
+      "id": "ba0d0769-cfc8-4f6a-98ba-f52120caafbd",
+      "name": "listar_mesas",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca reservas confirmadas na tabela de reservas. Use para verificar disponibilidade de mesas em uma data/turno específico ou para consultar reservas de um cliente.\n\nParâmetros:\n- data_reserva (obrigatório, formato YYYY-MM-DD): Data da reserva a ser consultada\n- turno (obrigatório): 'almoco' ou 'jantar'\n- telefone (opcional): Telefone do cliente para buscar suas reservas específicas\n\nRetorna: Array de reservas com:\n- id: ID único da reserva\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- data_reserva: Data da reserva (YYYY-MM-DD)\n- horario_reserva: Horário (HH:MM)\n- numero_pessoas: Número de pessoas\n- turno: 'almoco' ou 'jantar'\n- mesas: Nomes das mesas reservadas (ex: 'Mesa 9+Mesa 10')\n- status: Status da reserva (ex: 'confirmada', 'cancelada')\n\nExemplo: buscar_reserva(data_reserva='2025-01-15', turno='jantar')\n\nIMPORTANTE: Use esta tool junto com listar_mesas para cruzar dados e encontrar mesas livres.",
+        "operation": "getAll",
+        "tableId": "reservas"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -4400,
+        2768
+      ],
+      "id": "3f899683-7a96-46be-a848-d3b120df621b",
+      "name": "buscar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra uma nova reserva no sistema. Use APENAS quando o cliente confirmar interesse e você tiver TODOS os dados obrigatórios.\n\nParâmetros OBRIGATÓRIOS:\n- nome (string): Nome completo do cliente\n- telefone (string, formato: 5511999999999): Telefone do cliente com DDD e código do país\n- data_reserva (string, formato YYYY-MM-DD): Data da reserva (ex: '2025-01-15')\n- horario_reserva (string, formato HH:MM): Horário da reserva (ex: '20:00')\n- numero_pessoas (integer): Número de pessoas (ex: 4)\n- turno (string): 'almoco' ou 'jantar'\n- mesas (string): Nome(s) da(s) mesa(s) separadas por '+' se múltiplas (ex: 'Mesa 9' ou 'Mesa 9+Mesa 10')\n\nRetorna: Objeto com o ID da reserva criada e todos os dados registrados.\n\nExemplo: registrar_reserva(nome='João Silva', telefone='5511999999999', data_reserva='2025-01-15', horario_reserva='20:00', numero_pessoas=4, turno='jantar', mesas='Mesa 9+Mesa 10')\n\nVALIDAÇÃO OBRIGATÓRIA: Confirme que tem TODOS os parâmetros obrigatórios antes de chamar. Se faltar qualquer campo, informe ao cliente que precisa dos dados completos.",
+        "tableId": "reservas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nome completo do cliente`, 'string') }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Telefone do cliente com DDD e código do país (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "data_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Data da reserva no formato YYYY-MM-DD (ex: 2025-01-15)`, 'string') }}"
+            },
+            {
+              "fieldId": "horario_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Horário da reserva no formato HH:MM (ex: 20:00)`, 'string') }}"
+            },
+            {
+              "fieldId": "numero_pessoas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Número de pessoas`, 'number') }}"
+            },
+            {
+              "fieldId": "turno",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', `Turno: almoco ou jantar`, 'string') }}"
+            },
+            {
+              "fieldId": "mesas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', `Nome(s) da(s) mesa(s) separadas por + se múltiplas (ex: Mesa 9 ou Mesa 9+Mesa 10)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "confirmada"
+            },
+            {
+              "fieldId": "status_comparecimento",
+              "fieldValue": "agendado"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        2768
+      ],
+      "id": "a9abdfcf-4af1-4ad2-b744-9653689d55f7",
+      "name": "registrar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Atualiza uma reserva existente (remarcação). Use quando o cliente quiser alterar data, horário, número de pessoas ou mesas de uma reserva já confirmada.\n\nParâmetros OBRIGATÓRIOS:\n- id (string ou integer): ID da reserva a ser atualizada (obtido via buscar_reserva)\n\nParâmetros OPCIONAIS (informe apenas os que deseja alterar):\n- data_reserva (string, formato YYYY-MM-DD): Nova data\n- horario_reserva (string, formato HH:MM): Novo horário\n- numero_pessoas (integer): Novo número de pessoas\n- turno (string): Novo turno ('almoco' ou 'jantar')\n- mesas (string): Nova(s) mesa(s)\n- nome (string): Novo nome\n- telefone (string): Novo telefone\n\nRetorna: Objeto com os dados atualizados da reserva.\n\nExemplo: update_reserva(id='abc123', data_reserva='2025-01-20', horario_reserva='21:00')\n\nIMPORTANTE: \n1. SEMPRE busque a reserva usando buscar_reserva ANTES de atualizar para obter o ID\n2. NUNCA crie uma nova reserva para remarcação - sempre atualize a existente\n3. Se não conseguir obter o ID, peça ao cliente a data e horário da reserva original",
+        "operation": "update",
+        "tableId": "reservas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', `ID do registro a ser atualizado`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "data_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nova data da reserva (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "horario_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Novo horário da reserva (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "numero_pessoas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Novo número de pessoas (opcional)`, 'number') }}"
+            },
+            {
+              "fieldId": "turno",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Novo turno: almoco ou jantar (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "mesas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Nova(s) mesa(s) (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', `Novo nome (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', `Novo telefone (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -4112,
+        2768
+      ],
+      "id": "64bb67ae-1da1-4e3d-aa36-0834e42c415e",
+      "name": "update_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cancela uma reserva existente. Use quando o cliente solicitar cancelamento.\n\nParâmetros OBRIGATÓRIOS:\n- id (string ou integer): ID da reserva a ser cancelada (obtido via buscar_reserva)\n\nRetorna: Confirmação do cancelamento com status atualizado.\n\nExemplo: cancelar_reserva(id='abc123')\n\nIMPORTANTE:\n1. SEMPRE busque a reserva usando buscar_reserva ANTES de cancelar para obter o ID\n2. Seja sempre gentil e positivo ao confirmar o cancelamento\n3. Se não conseguir obter o ID, peça ao cliente a data e horário da reserva\n\nMensagem de confirmação sugerida: 'Sua reserva foi cancelada com sucesso. Esperamos recebê-lo em outra oportunidade!'",
+        "operation": "update",
+        "tableId": "reservas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', `ID do registro a ser atualizado`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status_comparecimento",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `status_comparecimento`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -3968,
+        2768
+      ],
+      "id": "6bd24584-9977-4132-b922-ea89747b68d3",
+      "name": "cancelar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca leads convertidos na tabela de leads. Use para verificar se um cliente já foi convertido e obter informações sobre seu histórico.\n\nParâmetros:\n- telefone (string, opcional): Telefone do cliente para buscar leads específicos\n- etapa (string, opcional): Etapa do funil para filtrar (ex: 'convertido', 'reserva_confirmada')\n\nRetorna: Array de objetos com:\n- id: ID do lead\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- etapa: Etapa atual no funil\n- contexto: Histórico de conversas\n- data_ultima_msg: Data da última mensagem\n- conversation_id: ID da conversa\n\nExemplo: busca_convertidos1(telefone='5511999999999')\n\nUse quando precisar consultar o histórico de um cliente específico.",
+        "operation": "getAll",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -3472,
+        2672
+      ],
+      "id": "bc6475eb-4dfd-4db3-ba5b-aeda7823d5a7",
+      "name": "busca_convertidos1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca interesses de leads na tabela de leads. Use para verificar quais clientes demonstraram interesse e em qual estágio do funil estão.\n\nParâmetros:\n- telefone (string, opcional): Telefone do cliente para buscar interesses específicos\n- etapa (string, opcional): Etapa do funil para filtrar (ex: 'interesse', 'reserva_confirmada')\n\nRetorna: Array de objetos com:\n- id: ID do lead\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- etapa: Etapa atual no funil\n- contexto: Histórico da intenção e decisões\n- numero_pessoas: Tamanho do grupo (se informado)\n- data_reserva: Data solicitada (se informado)\n\nExemplo: buscar_interesses1(telefone='5511999999999')\n\nUse para entender o histórico de interesse de um cliente antes de iniciar o atendimento.",
+        "operation": "getAll",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -3312,
+        2672
+      ],
+      "id": "d31db58e-5625-43fb-a9c1-f0cc9a7220f6",
+      "name": "buscar_interesses1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Insere ou atualiza a etapa do funil de um lead. Use para atualizar o progresso do cliente na jornada de conversão.\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n- etapa (string): Nova etapa do funil. Valores possíveis:\n  * 'interesse': Cliente demonstrou interesse\n  * 'reserva_confirmada': Reserva foi confirmada\n  * 'cancelado': Reserva foi cancelada\n  * 'convertido': Cliente foi convertido\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente (se estiver criando novo lead)\n- contexto (string): Contexto adicional sobre a etapa\n\nRetorna: Confirmação da atualização.\n\nExemplo: inserir_etapa1(telefone='5511999999999', etapa='reserva_confirmada')\n\nUse para manter o funil de vendas atualizado conforme o cliente avança na jornada.",
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Nova etapa do funil: interesse, reserva_confirmada, cancelado ou convertido`, 'string') }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Contexto adicional sobre a etapa (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -3168,
+        2672
+      ],
+      "id": "e4579945-65ad-43cd-bba1-34f5a5707b8a",
+      "name": "inserir_etapa1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra um lead como convertido na tabela de leads. Use quando um cliente completou uma conversão bem-sucedida (reserva confirmada e realizada, por exemplo).\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente\n- etapa (string): Geralmente 'convertido'\n- contexto (string): Informações adicionais sobre a conversão\n- data_ultima_msg (string): Data da última interação\n\nRetorna: Confirmação do registro de conversão.\n\nExemplo: inserir_convertidos1(telefone='5511999999999', nome='João Silva', etapa='convertido')\n\nUse quando um cliente completou com sucesso a ação desejada (reserva realizada, etc).",
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "convertido"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Informações sobre a conversão (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -3024,
+        2672
+      ],
+      "id": "97e5aa72-5b8a-4e3d-a7da-61af97382cc2",
+      "name": "inserir_convertidos1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra um interesse de um novo lead na tabela de leads. Use quando um cliente demonstra interesse inicial (pergunta sobre reservas, horários, etc).\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente (se disponível)\n- etapa (string): Geralmente 'interesse'\n- contexto (string): Descrição do interesse demonstrado\n- data_ultima_msg (string): Data da interação\n- canal_de_origem (string): Canal de origem (ex: 'WhatsApp')\n\nRetorna: Confirmação do registro de interesse.\n\nExemplo: inserir_interesse1(telefone='5511999999999', nome='Maria Silva', etapa='interesse', contexto='Cliente perguntou sobre disponibilidade para sábado à noite')\n\nUse no início do atendimento quando o cliente demonstra interesse para começar a rastrear no funil.",
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "interesse"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Descrição do interesse demonstrado (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -2864,
+        2672
+      ],
+      "id": "c06bdd17-e447-4db5-a370-b3e2e41b222d",
+      "name": "inserir_interesse1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "registrar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "listar_mesas": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancelar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_convertidos1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_interesses1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_etapa1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_convertidos1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_interesse1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "29ae1bd0-3243-48d9-877a-ec2264503823",
+  "meta": {
+    "instanceId": "71c37f17472b379af220483d9544aebd985ca42d6aba46d245ed6224ce4bef99"
+  },
+  "id": "ou75WL7BJOMQQJgM",
+  "tags": []
+}

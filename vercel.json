@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/verificar-mensagens",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/executar-mensagens-agendadas",
+      "schedule": "0 10 * * *"
     }
   ]
 }

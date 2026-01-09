@@ -75,6 +75,8 @@ export function processarTemplate(
     data_reserva?: string
     numero_pessoas?: number
     mesas?: string
+    data_atual?: string
+    telefone?: string
   }
 ): string {
   let mensagem = template
@@ -85,6 +87,8 @@ export function processarTemplate(
   mensagem = mensagem.replace(/{data_reserva}/g, dados.data_reserva || '')
   mensagem = mensagem.replace(/{numero_pessoas}/g, dados.numero_pessoas?.toString() || '')
   mensagem = mensagem.replace(/{mesas}/g, dados.mesas || '')
+  mensagem = mensagem.replace(/{data_atual}/g, dados.data_atual || new Date().toLocaleDateString('pt-BR'))
+  mensagem = mensagem.replace(/{telefone}/g, dados.telefone || '')
 
   return mensagem
 }

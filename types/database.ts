@@ -156,6 +156,8 @@ export type Database = {
           mensagem_ia: string | null
           mensagem_lead: string | null
           sessionid: string | null
+          tipo_mensagem: string | null
+          conversation_id: string | null
         }
         Insert: {
           id?: number
@@ -165,6 +167,8 @@ export type Database = {
           mensagem_ia?: string | null
           mensagem_lead?: string | null
           sessionid?: string | null
+          tipo_mensagem?: string | null
+          conversation_id?: string | null
         }
         Update: {
           id?: number
@@ -174,6 +178,8 @@ export type Database = {
           mensagem_ia?: string | null
           mensagem_lead?: string | null
           sessionid?: string | null
+          tipo_mensagem?: string | null
+          conversation_id?: string | null
         }
       }
       atendimento_humano: {
@@ -281,6 +287,50 @@ export type Database = {
           placeholder_nome?: string
           created_at?: string | null
           updated_at?: string | null
+        }
+      }
+      mensagens_agendadas: {
+        Row: {
+          id: string
+          reserva_id: string | null
+          telefone: string
+          nome: string
+          tipo: 'confirmacao' | 'cancelamento' | 'atraso' | 'lembrete'
+          mensagem: string
+          agendado_para: string
+          status: 'pendente' | 'enviada' | 'cancelada' | 'erro'
+          enviado_em: string | null
+          erro: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          reserva_id?: string | null
+          telefone: string
+          nome: string
+          tipo: 'confirmacao' | 'cancelamento' | 'atraso' | 'lembrete'
+          mensagem: string
+          agendado_para: string
+          status?: 'pendente' | 'enviada' | 'cancelada' | 'erro'
+          enviado_em?: string | null
+          erro?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          reserva_id?: string | null
+          telefone?: string
+          nome?: string
+          tipo?: 'confirmacao' | 'cancelamento' | 'atraso' | 'lembrete'
+          mensagem?: string
+          agendado_para?: string
+          status?: 'pendente' | 'enviada' | 'cancelada' | 'erro'
+          enviado_em?: string | null
+          erro?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       usuarios: {

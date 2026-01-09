@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { verificarMensagemJaEnviada, createMensagemAutomatica } from "@/lib/db/mensagens-automaticas"
 import { getLeadByTelefone, updateLeadByTelefone } from "@/lib/db/leads"
-import { getConfiguracaoMensagem, processarTemplate } from "@/lib/db/configuracoes-mensagens"
-import { evolutionApi } from "@/lib/evolution-api/client"
+import { getConfiguracaoMensagem } from "@/lib/db/configuracoes-mensagens"
+import { createMensagemAgendada } from "@/lib/db/mensagens-agendadas"
 
 /**
  * POST /api/automatizacoes/verificar-nao-comparecimento
@@ -56,8 +56,60 @@ export async function POST(request: NextRequest) {
         const minutosAtual = horaAtual * 60 + minutoAtual
         const diferenca = minutosAtual - minutosReserva
 
-        // Verificar se passou 15 minutos
-        if (diferenca < 15) {
+        // Criar mensagens agendadas para múltiplos horários (15, 30, 60 minutos)
+        const horariosAtraso = [15, 30, 60]
+        let mensagensCriadas = 0
+
+        // Buscar template configurado
+        const configMensagem = await getConfiguracaoMensagem('nao_comparecimento')
+        const template = configMensagem?.template || 
+          'Olá {nome}! Notamos que você tinha uma reserva para hoje às {horario_reserva} e ainda não chegou. Você ainda vai conseguir vir? Se precisar remarcar ou cancelar, estamos à disposição! 😊'
+
+        for (const minutosAtraso of horariosAtraso) {
+          if (diferenca >= minutosAtraso) {
+            // Calcular horário de envio (horário da reserva + minutos de atraso)
+            const horarioReserva = new Date()
+            horarioReserva.setHours(hora, minuto, 0, 0)
+            const horarioEnvio = new Date(horarioReserva)
+            horarioEnvio.setMinutes(horarioEnvio.getMinutes() + minutosAtraso)
+
+            // Verificar se já existe mensagem agendada para este horário
+            const { data: existente } = await supabase
+              .from('mensagens_agendadas')
+              .select('id')
+              .eq('reserva_id', reserva.id)
+              .eq('tipo', 'atraso')
+              .eq('status', 'pendente')
+              .gte('agendado_para', horarioEnvio.toISOString())
+              .lt('agendado_para', new Date(horarioEnvio.getTime() + 60000).toISOString())
+              .maybeSingle()
+
+            if (!existente) {
+              // Criar mensagem agendada
+              await createMensagemAgendada({
+                reserva_id: reserva.id,
+                telefone: reserva.telefone,
+                nome: reserva.nome,
+                tipo: 'atraso',
+                mensagem: template,
+                agendado_para: horarioEnvio.toISOString(),
+                status: 'pendente',
+              })
+              mensagensCriadas++
+            }
+          }
+        }
+
+        if (mensagensCriadas > 0) {
+          mensagensEnviadas += mensagensCriadas
+          resultados.push({
+            reserva_id: reserva.id,
+            nome: reserva.nome,
+            telefone: reserva.telefone,
+            status: 'enviada',
+            motivo: `${mensagensCriadas} mensagem(ns) agendada(s)`,
+          })
+        } else if (diferenca < 15) {
           resultados.push({
             reserva_id: reserva.id,
             nome: reserva.nome,
@@ -65,93 +117,13 @@ export async function POST(request: NextRequest) {
             status: 'ignorada',
             motivo: `Ainda não passou 15 minutos (${diferenca} min)`,
           })
-          continue
-        }
-
-        // Verificar se já foi enviada mensagem para esta reserva
-        const jaEnviada = await verificarMensagemJaEnviada(reserva.id, 'nao_comparecimento')
-        if (jaEnviada) {
+        } else {
           resultados.push({
             reserva_id: reserva.id,
             nome: reserva.nome,
             telefone: reserva.telefone,
             status: 'ignorada',
-            motivo: 'Mensagem já enviada anteriormente',
-          })
-          continue
-        }
-
-        // Buscar template configurado
-        const configMensagem = await getConfiguracaoMensagem('nao_comparecimento')
-        
-        // Se não houver configuração, usar template padrão
-        const template = configMensagem?.template || 
-          'Olá {nome}! Notamos que você tinha uma reserva para hoje às {horario_reserva} e ainda não chegou. Você ainda vai conseguir vir? Se precisar remarcar ou cancelar, estamos à disposição! 😊'
-        
-        // Processar template com dados da reserva
-        const mensagem = processarTemplate(template, {
-          nome: reserva.nome,
-          horario_reserva: reserva.horario_reserva,
-          data_reserva: reserva.data_reserva,
-          numero_pessoas: reserva.numero_pessoas,
-          mesas: reserva.mesas || undefined,
-        })
-
-        // Enviar mensagem via Evolution API
-        try {
-          await evolutionApi.sendText({
-            number: reserva.telefone,
-            text: mensagem,
-          })
-
-          // Registrar mensagem enviada
-          await createMensagemAutomatica({
-            reserva_id: reserva.id,
-            telefone: reserva.telefone,
-            nome: reserva.nome,
-            mensagem,
-            tipo: 'nao_comparecimento',
-            status: 'enviada',
-            data_envio: new Date().toISOString(),
-          })
-
-          // Atualizar contexto do lead
-          const lead = await getLeadByTelefone(reserva.telefone)
-          if (lead) {
-            const contexto = `Cliente não compareceu em ${reserva.data_reserva} às ${reserva.horario_reserva}. Mensagem automática de não comparecimento enviada após 15 minutos de atraso.`
-            await updateLeadByTelefone(reserva.telefone, {
-              contexto: lead.contexto ? `${lead.contexto}\n\n${contexto}` : contexto,
-              data_ultima_msg: new Date().toISOString(),
-            })
-          }
-
-          mensagensEnviadas++
-          resultados.push({
-            reserva_id: reserva.id,
-            nome: reserva.nome,
-            telefone: reserva.telefone,
-            status: 'enviada',
-          })
-        } catch (errorEnvio: any) {
-          // Registrar erro
-          await createMensagemAutomatica({
-            reserva_id: reserva.id,
-            telefone: reserva.telefone,
-            nome: reserva.nome,
-            mensagem,
-            tipo: 'nao_comparecimento',
-            status: 'erro',
-            erro: errorEnvio.message || 'Erro ao enviar mensagem',
-            data_envio: new Date().toISOString(),
-          })
-
-          erros++
-          resultados.push({
-            reserva_id: reserva.id,
-            nome: reserva.nome,
-            telefone: reserva.telefone,
-            status: 'erro',
-            motivo: errorEnvio.message || 'Erro ao enviar mensagem',
+            motivo: 'Mensagens já agendadas anteriormente',
           })
         }
       } catch (error: any) {

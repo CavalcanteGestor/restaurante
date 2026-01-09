@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createMensagemAgendada } from "@/lib/db/mensagens-agendadas"
+import { getConfiguracaoMensagem } from "@/lib/db/configuracoes-mensagens"
+import { formatDate } from "@/lib/utils/date"
 
 /**
  * PATCH /api/reservas/[id]/status
@@ -51,12 +54,31 @@ export async function PATCH(
       throw error
     }
 
-    // Se marcar como não compareceu ou compareceu, enviar notificação
-    if (status_comparecimento === 'nao_compareceu') {
-      // TODO: Integrar com sistema de notificações/n8n
+    // Se marcar como compareceu, criar mensagem de confirmação agendada
+    if (status_comparecimento === 'compareceu') {
+      try {
+        const configConfirmacao = await getConfiguracaoMensagem('confirmacao')
+        let templateConfirmacao = "Olá {nome}! Confirmamos sua presença para a reserva de hoje às {horario_reserva}. Estamos ansiosos para recebê-lo(a)! 😊"
+        
+        if (configConfirmacao && configConfirmacao.ativo) {
+          templateConfirmacao = configConfirmacao.template
+        }
+
+        await createMensagemAgendada({
+          reserva_id: id,
+          telefone: data.telefone,
+          nome: data.nome,
+          tipo: 'confirmacao',
+          mensagem: templateConfirmacao,
+          agendado_para: new Date().toISOString(), // Enviar imediatamente
+          status: 'pendente',
+        })
+      } catch (error) {
+        console.error("[Status Reserva] Erro ao criar mensagem de confirmação:", error)
+        // Não falhar a atualização se houver erro na mensagem
+      }
+    } else if (status_comparecimento === 'nao_compareceu') {
       console.log(`[Reservas] Cliente não compareceu: ${data.nome} - ${data.telefone}`)
-    } else if (status_comparecimento === 'compareceu') {
-      console.log(`[Reservas] Cliente compareceu: ${data.nome}`)
     }
 
     return NextResponse.json({

@@ -15,6 +15,7 @@ import {
   Phone,
   Shield,
   UserCircle,
+  Bot,
 } from "lucide-react"
 import { UserRole } from "@/lib/auth/user"
 
@@ -32,6 +33,7 @@ const adminNavigation = [
   { name: "WhatsApp", href: "/whatsapp", icon: Phone },
   { name: "Relatórios", href: "/relatorios", icon: BarChart3 },
   { name: "Automatizações", href: "/automatizacoes", icon: Settings },
+  { name: "Inteligência Artificial", href: "/automatizacoes/ia", icon: Bot },
   { name: "Usuários", href: "/admin/usuarios", icon: Shield },
 ]
 
