@@ -57,22 +57,34 @@ export async function getEstatisticasConversas(
   dataInicio?: string,
   dataFim?: string
 ): Promise<EstatisticasConversas> {
-  const supabase = await createClient()
-  
-  let query = supabase.from('conversas').select('*')
-  
-  if (dataInicio) {
-    query = query.gte('data_mensagem', dataInicio)
-  }
-  if (dataFim) {
-    query = query.lte('data_mensagem', dataFim)
-  }
+  try {
+    const supabase = await createClient()
+    
+    let query = supabase.from('conversas').select('*')
+    
+    if (dataInicio) {
+      query = query.gte('data_mensagem', dataInicio)
+    }
+    if (dataFim) {
+      query = query.lte('data_mensagem', dataFim)
+    }
 
-  const { data, error } = await query
+    const { data, error } = await query
 
-  if (error) throw error
+    if (error) {
+      console.error("Erro ao buscar estatísticas de conversas:", error)
+      // Retornar estatísticas vazias em caso de erro
+      return {
+        total: 0,
+        mensagensIA: 0,
+        mensagensLead: 0,
+        mensagensHumano: 0,
+        mensagensAutomaticas: 0,
+        porTipo: {},
+      }
+    }
 
-  const conversas = (data || []) as Conversa[]
+    const conversas = (data || []) as Conversa[]
 
   const estatisticas: EstatisticasConversas = {
     total: conversas.length,
@@ -117,6 +129,17 @@ export async function getEstatisticasConversas(
     estatisticas.tempoMedioResposta = tempoMedio / 1000 / 60 // Convertido para minutos
   }
 
-  return estatisticas
+    return estatisticas
+  } catch (error: any) {
+    console.error("Erro ao calcular estatísticas de conversas:", error)
+    return {
+      total: 0,
+      mensagensIA: 0,
+      mensagensLead: 0,
+      mensagensHumano: 0,
+      mensagensAutomaticas: 0,
+      porTipo: {},
+    }
+  }
 }
 

@@ -15,35 +15,48 @@ export interface FiltrosMensagensAgendadas {
 }
 
 export async function getMensagensAgendadas(filters?: FiltrosMensagensAgendadas) {
-  const supabase = await createClient()
-  let query = supabase
-    .from('mensagens_agendadas')
-    .select('*')
-    .order('agendado_para', { ascending: true })
+  try {
+    const supabase = await createClient()
+    let query = supabase
+      .from('mensagens_agendadas')
+      .select('*')
+      .order('agendado_para', { ascending: true })
 
-  if (filters?.status) {
-    query = query.eq('status', filters.status)
-  }
-  if (filters?.tipo) {
-    query = query.eq('tipo', filters.tipo)
-  }
-  if (filters?.reserva_id) {
-    query = query.eq('reserva_id', filters.reserva_id)
-  }
-  if (filters?.telefone) {
-    query = query.eq('telefone', filters.telefone)
-  }
-  if (filters?.data_inicio) {
-    query = query.gte('agendado_para', filters.data_inicio)
-  }
-  if (filters?.data_fim) {
-    query = query.lte('agendado_para', filters.data_fim)
-  }
+    if (filters?.status) {
+      query = query.eq('status', filters.status)
+    }
+    if (filters?.tipo) {
+      query = query.eq('tipo', filters.tipo)
+    }
+    if (filters?.reserva_id) {
+      query = query.eq('reserva_id', filters.reserva_id)
+    }
+    if (filters?.telefone) {
+      query = query.eq('telefone', filters.telefone)
+    }
+    if (filters?.data_inicio) {
+      query = query.gte('agendado_para', filters.data_inicio)
+    }
+    if (filters?.data_fim) {
+      query = query.lte('agendado_para', filters.data_fim)
+    }
 
-  const { data, error } = await query
+    const { data, error } = await query
 
-  if (error) throw error
-  return (data || []) as MensagemAgendada[]
+    if (error) {
+      // Se a tabela não existe ainda, retornar array vazio
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.warn("Tabela mensagens_agendadas ainda não existe. Execute a migration SQL.")
+        return []
+      }
+      throw error
+    }
+    return (data || []) as MensagemAgendada[]
+  } catch (error: any) {
+    console.error("Erro ao buscar mensagens agendadas:", error)
+    // Retornar array vazio em caso de erro para não quebrar a página
+    return []
+  }
 }
 
 export async function getMensagensParaExecutar() {
