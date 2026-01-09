@@ -6,12 +6,8 @@
   "regions": ["gru1"],
   "crons": [
     {
-      "path": "/api/cron/verificar-mensagens",
-      "schedule": "0 9 * * *"
-    },
-    {
       "path": "/api/cron/executar-mensagens-agendadas",
-      "schedule": "0 10 * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
