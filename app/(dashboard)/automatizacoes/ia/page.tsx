@@ -12,11 +12,42 @@ import { getClientes } from "@/lib/db/clientes"
 export const dynamic = 'force-dynamic'
 
 export default async function IAPage() {
-  // Buscar dados iniciais
-  const estatisticas = await getEstatisticasConversas()
-  const mensagensPendentes = await getMensagensAgendadas({ status: 'pendente' })
-  const mensagensErro = await getMensagensAgendadas({ status: 'erro' })
-  const clientes = await getClientes()
+  // Buscar dados iniciais com tratamento de erro
+  let estatisticas = {
+    total: 0,
+    mensagensIA: 0,
+    mensagensLead: 0,
+    mensagensHumano: 0,
+    mensagensAutomaticas: 0,
+    porTipo: {},
+  }
+  let mensagensPendentes: any[] = []
+  let mensagensErro: any[] = []
+  let clientes: any[] = []
+
+  try {
+    estatisticas = await getEstatisticasConversas()
+  } catch (error) {
+    console.error("Erro ao buscar estatísticas:", error)
+  }
+
+  try {
+    mensagensPendentes = await getMensagensAgendadas({ status: 'pendente' })
+  } catch (error) {
+    console.error("Erro ao buscar mensagens pendentes:", error)
+  }
+
+  try {
+    mensagensErro = await getMensagensAgendadas({ status: 'erro' })
+  } catch (error) {
+    console.error("Erro ao buscar mensagens com erro:", error)
+  }
+
+  try {
+    clientes = await getClientes()
+  } catch (error) {
+    console.error("Erro ao buscar clientes:", error)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F0E8] via-white to-[#F5F0E8]/50 p-4 md:p-8">

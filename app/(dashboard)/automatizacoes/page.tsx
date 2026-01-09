@@ -6,9 +6,19 @@ import { Send, Clock, AlertCircle, Settings, Zap, MessageSquare } from "lucide-r
 import { Badge } from "@/components/ui/badge"
 import EnviarMensagemAtraso from "@/components/automatizacoes/EnviarMensagemAtraso"
 import Link from "next/link"
+import { Database } from "@/types/database"
+
+type Reserva = Database['public']['Tables']['reservas']['Row']
+
+export const dynamic = 'force-dynamic'
 
 export default async function AutomatizacoesPage() {
-  const reservasAtrasadas = await getReservasAtrasadas()
+  let reservasAtrasadas: Reserva[] = []
+  try {
+    reservasAtrasadas = await getReservasAtrasadas()
+  } catch (error) {
+    console.error("Erro ao buscar reservas atrasadas:", error)
+  }
 
   return (
     <div className="space-y-4 md:space-y-8 p-4 md:p-6">
