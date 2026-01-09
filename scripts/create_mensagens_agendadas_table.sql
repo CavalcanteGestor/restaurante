@@ -1,7 +1,7 @@
--- Criar tabela mensagens_agendadas
+-- Criar tabela mensagens_agendadas (sem foreign key inicialmente)
 CREATE TABLE IF NOT EXISTS public.mensagens_agendadas (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  reserva_id UUID REFERENCES public.reservas(id) ON DELETE SET NULL,
+  reserva_id UUID,
   telefone TEXT NOT NULL,
   nome TEXT NOT NULL,
   tipo TEXT NOT NULL CHECK (tipo IN ('confirmacao', 'cancelamento', 'atraso', 'lembrete')),
@@ -13,6 +13,24 @@ CREATE TABLE IF NOT EXISTS public.mensagens_agendadas (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+-- Adicionar foreign key apenas se a tabela reservas existir
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'reservas') THEN
+    -- Adicionar constraint de foreign key se a tabela reservas existir
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint 
+      WHERE conname = 'mensagens_agendadas_reserva_id_fkey'
+    ) THEN
+      ALTER TABLE public.mensagens_agendadas 
+      ADD CONSTRAINT mensagens_agendadas_reserva_id_fkey 
+      FOREIGN KEY (reserva_id) 
+      REFERENCES public.reservas(id) 
+      ON DELETE SET NULL;
+    END IF;
+  END IF;
+END $$;
 
 -- Criar índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_mensagens_agendadas_status ON public.mensagens_agendadas(status);
@@ -37,11 +55,21 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
 -- Adicionar campos tipo_mensagem e conversation_id na tabela conversas (se ainda não existirem)
-ALTER TABLE public.conversas 
-ADD COLUMN IF NOT EXISTS tipo_mensagem TEXT,
-ADD COLUMN IF NOT EXISTS conversation_id TEXT;
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'conversas') THEN
+    ALTER TABLE public.conversas 
+    ADD COLUMN IF NOT EXISTS tipo_mensagem TEXT,
+    ADD COLUMN IF NOT EXISTS conversation_id TEXT;
 
--- Criar índice para tipo_mensagem
-CREATE INDEX IF NOT EXISTS idx_conversas_tipo_mensagem ON public.conversas(tipo_mensagem);
-CREATE INDEX IF NOT EXISTS idx_conversas_conversation_id ON public.conversas(conversation_id);
+    -- Criar índice para tipo_mensagem
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_conversas_tipo_mensagem') THEN
+      CREATE INDEX idx_conversas_tipo_mensagem ON public.conversas(tipo_mensagem);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_conversas_conversation_id') THEN
+      CREATE INDEX idx_conversas_conversation_id ON public.conversas(conversation_id);
+    END IF;
+  END IF;
+END $$;
 
