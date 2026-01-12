@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth/user"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Link from "next/link"
-import { Settings, Users, Shield, FileText, Clock, Calendar, BarChart3, Table } from "lucide-react"
+import { Settings, Users, Shield, FileText, Clock, Calendar, BarChart3, Table, FileUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -105,6 +105,24 @@ export default async function AdminPage() {
                   <CardTitle className="text-lg font-bold">Adicionar Mesas</CardTitle>
                   <CardDescription className="mt-1 text-[#8B2E3D]/70">
                     Adicione todas as mesas do restaurante
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-[#8B2E3D]/50 group h-full">
+          <Link href="/admin/documentos" className="block h-full">
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-[#8B2E3D]/10 flex items-center justify-center group-hover:bg-[#8B2E3D]/20 transition-colors">
+                  <FileUp className="h-7 w-7 text-[#8B2E3D]" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg font-bold">Documentos</CardTitle>
+                  <CardDescription className="mt-1 text-[#8B2E3D]/70">
+                    Gerencie cardápios e documentos do restaurante
                   </CardDescription>
                 </div>
               </div>

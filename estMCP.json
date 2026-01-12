@@ -403,6 +403,29 @@
           "name": "Supabase Bistro"
         }
       }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca documentos disponíveis do restaurante (cardápios, cartela de vídeos, informações). Use quando o cliente solicitar cardápio, menu, informações sobre o restaurante, mesas, ou cartela de vinhos/vídeos.\n\nParâmetros:\n- tipo (string, opcional): Tipo do documento ('cardapio', 'cartela_videos', 'restaurante'). Se não fornecido, retorna todos os tipos.\n\nRetorna: Array de documentos com:\n- id: ID do documento\n- tipo: Tipo do documento (cardapio, cartela_videos, restaurante)\n- titulo: Título do documento\n- descricao: Descrição do documento\n- arquivo_url: URL pública do arquivo PDF para download\n- ativo: Se está ativo\n\nTipos de documentos:\n- 'cardapio': Cardápios do restaurante\n- 'cartela_videos': Cartela de vídeos/displays\n- 'restaurante': Informações gerais do restaurante\n\nExemplo: buscar_documentos(tipo='cardapio')\n\nIMPORTANTE: \n- Quando o cliente solicitar cardápio, menu, informações ou cartela de vinhos, use esta tool para buscar o documento\n- Após buscar, informe ao cliente que você tem o documento e forneça a URL (arquivo_url) do documento para que ele possa acessar\n- Sempre use o documento mais recente e ativo (geralmente será o primeiro da lista retornada)",
+        "operation": "getAll",
+        "tableId": "documentos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -2720,
+        2672
+      ],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "buscar_documentos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -511,6 +534,17 @@
         [
           {
             "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_documentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
             "type": "ai_tool",
             "index": 0
           }

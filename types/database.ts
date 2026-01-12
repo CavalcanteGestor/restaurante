@@ -386,6 +386,47 @@ export type Database = {
           username?: string | null
         }
       }
+      documentos: {
+        Row: {
+          id: string
+          tipo: 'cardapio' | 'cartela_videos' | 'restaurante'
+          titulo: string
+          descricao: string | null
+          arquivo_url: string
+          arquivo_nome: string
+          arquivo_tamanho: number | null
+          ativo: boolean
+          ordem: number
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          tipo: 'cardapio' | 'cartela_videos' | 'restaurante'
+          titulo: string
+          descricao?: string | null
+          arquivo_url: string
+          arquivo_nome: string
+          arquivo_tamanho?: number | null
+          ativo?: boolean
+          ordem?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          tipo?: 'cardapio' | 'cartela_videos' | 'restaurante'
+          titulo?: string
+          descricao?: string | null
+          arquivo_url?: string
+          arquivo_nome?: string
+          arquivo_tamanho?: number | null
+          ativo?: boolean
+          ordem?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
   }
 }
