@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "@/lib/auth/user"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 /**
  * GET - Buscar usuário por ID
@@ -110,6 +111,16 @@ export async function PUT(
 
     if (error) throw error
 
+    // Registrar auditoria
+    await logAuditoria(
+      'UPDATE',
+      'USUARIOS',
+      `Usuário ${id} atualizado`,
+      id,
+      updateData,
+      request
+    )
+
     return NextResponse.json({
       message: "Usuário atualizado com sucesso",
       usuario: data,
@@ -151,6 +162,23 @@ export async function DELETE(
     }
 
     const supabase = await createClient()
+
+    // Buscar dados do usuário antes de deletar para auditoria
+    const { data: usuarioAntes } = await supabase
+      .from('usuarios')
+      .select('nome, email')
+      .eq('id', id)
+      .single()
+
+    // Registrar auditoria antes de deletar
+    await logAuditoria(
+      'DELETE',
+      'USUARIOS',
+      `Usuário deletado: ${usuarioAntes?.nome || 'N/A'} (${usuarioAntes?.email || 'N/A'})`,
+      id,
+      usuarioAntes || undefined,
+      request
+    )
 
     // Deletar da tabela usuarios primeiro
     const { error: usuarioError } = await supabase

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/auth/user"
 import { getDocumentoById, updateDocumento, deleteDocumento } from "@/lib/db/documentos"
 import { createClient } from "@/lib/supabase/server"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 /**
  * GET - Busca um documento por ID
@@ -119,6 +120,16 @@ export async function DELETE(
         console.warn("Erro ao remover arquivo do storage (continuando):", storageError)
       }
     }
+
+    // Registrar auditoria antes de deletar
+    await logAuditoria(
+      'DELETE',
+      'DOCUMENTOS',
+      `Documento deletado: ${documento.titulo}`,
+      id,
+      { tipo: documento.tipo, titulo: documento.titulo },
+      request
+    )
 
     // Remover registro da tabela
     await deleteDocumento(id)

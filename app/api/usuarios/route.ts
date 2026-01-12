@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "@/lib/auth/user"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 /**
  * POST - Criar novo usuário
@@ -101,6 +102,16 @@ export async function POST(request: NextRequest) {
       }
       throw usuarioError
     }
+
+    // Registrar auditoria
+    await logAuditoria(
+      'CREATE',
+      'USUARIOS',
+      `Usuário criado: ${nome} (${email})`,
+      authData.user.id,
+      { nome, email, tipo },
+      request
+    )
 
     return NextResponse.json({
       message: "Usuário criado com sucesso",

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "@/lib/auth/user"
 import { createDocumento, TipoDocumento } from "@/lib/db/documentos"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 /**
  * POST - Upload de arquivo PDF para o Supabase Storage
@@ -90,6 +91,16 @@ export async function POST(request: NextRequest) {
       ordem: ordem ? parseInt(ordem) : 0,
       ativo: true,
     })
+
+    // Registrar auditoria
+    await logAuditoria(
+      'CREATE',
+      'DOCUMENTOS',
+      `Documento criado: ${titulo} (${tipo})`,
+      documento.id,
+      { tipo, titulo, arquivo_nome: file.name, arquivo_tamanho: file.size },
+      request
+    )
 
     return NextResponse.json({ 
       documento,

@@ -1,0 +1,4555 @@
+{
+  "name": "est",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "mcpsaas"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -1312
+      ],
+      "id": "72be0087-125a-4be8-9dd6-fe9ed724b3f5",
+      "name": "MCPSAAS",
+      "webhookId": "5b06ed4f-2e67-4b58-9d51-887996e1b1ab"
+    },
+    {
+      "parameters": {
+        "path": "bistro"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -1232
+      ],
+      "id": "64a338f7-d184-44c6-aad3-3a8edbec44b1",
+      "name": "MCPBistro",
+      "webhookId": "5b06ed4f-2e67-4b58-9d51-887996e1b1ab"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Lista todas as mesas disponíveis do restaurante com suas características e regras de uso. Use SEMPRE antes de sugerir uma mesa ao cliente.\n\nRetorna: Array de objetos contendo:\n- id: ID da mesa\n- numero: Número da mesa (ex: 'Mesa 1', 'Mesa 9')\n- capacidade: Número de lugares\n- tipo: Tipo de mesa (ex: 'externa', 'interna', 'sala')\n- pode_juntar: Se pode ser unida com outras mesas (true/false)\n- mesas_compativel: Array de números de mesas que podem ser unidas\n- uso_pessoal: Se é apenas para uso pessoal (true/false)\n- uso_corporativo: Se aceita eventos corporativos (true/false)\n- tem_tv: Se tem TV/mídia (true/false)\n- ativo: Se está ativa (true/false)\n\nParâmetros: Nenhum. Chame sem parâmetros para obter todas as mesas.\n\nExemplo de uso: listar_mesas()\n\nIMPORTANTE: Use esta tool antes de sugerir qualquer mesa ao cliente para garantir que está disponível e compatível.",
+        "operation": "getAll",
+        "tableId": "mesas",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -896
+      ],
+      "id": "5040ec73-246d-431d-86c9-035d478b43ea",
+      "name": "listar_mesas",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca reservas confirmadas na tabela de reservas. Use para verificar disponibilidade de mesas em uma data/turno específico ou para consultar reservas de um cliente.\n\nParâmetros:\n- data_reserva (obrigatório, formato YYYY-MM-DD): Data da reserva a ser consultada\n- turno (obrigatório): 'almoco' ou 'jantar'\n- telefone (opcional): Telefone do cliente para buscar suas reservas específicas\n\nRetorna: Array de reservas com:\n- id: ID único da reserva\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- data_reserva: Data da reserva (YYYY-MM-DD)\n- horario_reserva: Horário (HH:MM)\n- numero_pessoas: Número de pessoas\n- turno: 'almoco' ou 'jantar'\n- mesas: Nomes das mesas reservadas (ex: 'Mesa 9+Mesa 10')\n- status: Status da reserva (ex: 'confirmada', 'cancelada')\n\nExemplo: buscar_reserva(data_reserva='2025-01-15', turno='jantar')\n\nIMPORTANTE: Use esta tool junto com listar_mesas para cruzar dados e encontrar mesas livres.",
+        "operation": "getAll",
+        "tableId": "reservas"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -896
+      ],
+      "id": "64679fa7-62ee-46ed-8200-5bede0680f6e",
+      "name": "buscar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra uma nova reserva no sistema. Use APENAS quando o cliente confirmar interesse e você tiver TODOS os dados obrigatórios.\n\nParâmetros OBRIGATÓRIOS:\n- nome (string): Nome completo do cliente\n- telefone (string, formato: 5511999999999): Telefone do cliente com DDD e código do país\n- data_reserva (string, formato YYYY-MM-DD): Data da reserva (ex: '2025-01-15')\n- horario_reserva (string, formato HH:MM): Horário da reserva (ex: '20:00')\n- numero_pessoas (integer): Número de pessoas (ex: 4)\n- turno (string): 'almoco' ou 'jantar'\n- mesas (string): Nome(s) da(s) mesa(s) separadas por '+' se múltiplas (ex: 'Mesa 9' ou 'Mesa 9+Mesa 10')\n\nRetorna: Objeto com o ID da reserva criada e todos os dados registrados.\n\nExemplo: registrar_reserva(nome='João Silva', telefone='5511999999999', data_reserva='2025-01-15', horario_reserva='20:00', numero_pessoas=4, turno='jantar', mesas='Mesa 9+Mesa 10')\n\nVALIDAÇÃO OBRIGATÓRIA: Confirme que tem TODOS os parâmetros obrigatórios antes de chamar. Se faltar qualquer campo, informe ao cliente que precisa dos dados completos.",
+        "tableId": "reservas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nome completo do cliente`, 'string') }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Telefone do cliente com DDD e código do país (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "data_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Data da reserva no formato YYYY-MM-DD (ex: 2025-01-15)`, 'string') }}"
+            },
+            {
+              "fieldId": "horario_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Horário da reserva no formato HH:MM (ex: 20:00)`, 'string') }}"
+            },
+            {
+              "fieldId": "numero_pessoas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Número de pessoas`, 'number') }}"
+            },
+            {
+              "fieldId": "turno",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', `Turno: almoco ou jantar`, 'string') }}"
+            },
+            {
+              "fieldId": "mesas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', `Nome(s) da(s) mesa(s) separadas por + se múltiplas (ex: Mesa 9 ou Mesa 9+Mesa 10)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "confirmada"
+            },
+            {
+              "fieldId": "status_comparecimento",
+              "fieldValue": "agendado"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -896
+      ],
+      "id": "cfa36c16-b76e-4760-b648-044aabb63e65",
+      "name": "registrar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Atualiza uma reserva existente (remarcação). Use quando o cliente quiser alterar data, horário, número de pessoas ou mesas de uma reserva já confirmada.\n\nParâmetros OBRIGATÓRIOS:\n- id (string ou integer): ID da reserva a ser atualizada (obtido via buscar_reserva)\n\nParâmetros OPCIONAIS (informe apenas os que deseja alterar):\n- data_reserva (string, formato YYYY-MM-DD): Nova data\n- horario_reserva (string, formato HH:MM): Novo horário\n- numero_pessoas (integer): Novo número de pessoas\n- turno (string): Novo turno ('almoco' ou 'jantar')\n- mesas (string): Nova(s) mesa(s)\n- nome (string): Novo nome\n- telefone (string): Novo telefone\n\nRetorna: Objeto com os dados atualizados da reserva.\n\nExemplo: update_reserva(id='abc123', data_reserva='2025-01-20', horario_reserva='21:00')\n\nIMPORTANTE: \n1. SEMPRE busque a reserva usando buscar_reserva ANTES de atualizar para obter o ID\n2. NUNCA crie uma nova reserva para remarcação - sempre atualize a existente\n3. Se não conseguir obter o ID, peça ao cliente a data e horário da reserva original",
+        "operation": "update",
+        "tableId": "reservas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', `ID do registro a ser atualizado`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "data_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nova data da reserva (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "horario_reserva",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Novo horário da reserva (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "numero_pessoas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Novo número de pessoas (opcional)`, 'number') }}"
+            },
+            {
+              "fieldId": "turno",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Novo turno: almoco ou jantar (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "mesas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Nova(s) mesa(s) (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', `Novo nome (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', `Novo telefone (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -896
+      ],
+      "id": "82a5b7c4-ba27-42e2-ab2f-6cc25fffe6e4",
+      "name": "update_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cancela uma reserva existente. Use quando o cliente solicitar cancelamento.\n\nParâmetros OBRIGATÓRIOS:\n- id (string ou integer): ID da reserva a ser cancelada (obtido via buscar_reserva)\n\nRetorna: Confirmação do cancelamento com status atualizado.\n\nExemplo: cancelar_reserva(id='abc123')\n\nIMPORTANTE:\n1. SEMPRE busque a reserva usando buscar_reserva ANTES de cancelar para obter o ID\n2. Seja sempre gentil e positivo ao confirmar o cancelamento\n3. Se não conseguir obter o ID, peça ao cliente a data e horário da reserva\n\nMensagem de confirmação sugerida: 'Sua reserva foi cancelada com sucesso. Esperamos recebê-lo em outra oportunidade!'",
+        "operation": "update",
+        "tableId": "reservas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', `ID do registro a ser atualizado`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status_comparecimento",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `status_comparecimento`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -896
+      ],
+      "id": "783a7f63-a9f8-4209-ba1b-e0b3be6e9951",
+      "name": "cancelar_reserva",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca leads convertidos na tabela de leads. Use para verificar se um cliente já foi convertido e obter informações sobre seu histórico.\n\nParâmetros:\n- telefone (string, opcional): Telefone do cliente para buscar leads específicos\n- etapa (string, opcional): Etapa do funil para filtrar (ex: 'convertido', 'reserva_confirmada')\n\nRetorna: Array de objetos com:\n- id: ID do lead\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- etapa: Etapa atual no funil\n- contexto: Histórico de conversas\n- data_ultima_msg: Data da última mensagem\n- conversation_id: ID da conversa\n\nExemplo: busca_convertidos1(telefone='5511999999999')\n\nUse quando precisar consultar o histórico de um cliente específico.",
+        "operation": "getAll",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -992
+      ],
+      "id": "169b1015-9d7c-4fb7-91f9-57ae4baab78e",
+      "name": "busca_convertidos1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca leads na tabela de leads. ⚠️ USE SEMPRE ANTES de inserir ou atualizar qualquer lead!\n\nIMPORTANTE:\n- SEMPRE busque primeiro usando esta ferramenta antes de usar inserir_interesse1 ou inserir_etapa1\n- Se encontrar um lead, use inserir_etapa1 para atualizar (não use inserir_interesse1)\n- Se NÃO encontrar lead (array vazio), aí sim use inserir_interesse1 para criar novo\n- NUNCA crie leads duplicados - sempre busque primeiro!\n\nParâmetros:\n- telefone (string, opcional): Telefone do cliente para buscar leads específicos (RECOMENDADO: sempre forneça o telefone)\n- etapa (string, opcional): Etapa do funil para filtrar (ex: 'interesse', 'reserva_confirmada')\n\nRetorna: Array de objetos com:\n- id: ID do lead\n- nome: Nome do cliente\n- telefone: Telefone do cliente\n- etapa: Etapa atual no funil\n- contexto: Histórico da intenção e decisões\n- numero_pessoas: Tamanho do grupo (se informado)\n- data_reserva: Data solicitada (se informado)\n\nExemplo: buscar_interesses1(telefone='5511999999999')\n\n⚠️ REGRA DE OURO: SEMPRE busque primeiro, depois decida se vai criar (inserir_interesse1) ou atualizar (inserir_etapa1).",
+        "operation": "getAll",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -992
+      ],
+      "id": "26329fc7-535d-4b1f-9c14-7c68803e489a",
+      "name": "buscar_interesses1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Atualiza a etapa do funil de um lead EXISTENTE. Use para atualizar o progresso do cliente na jornada de conversão.\n\n⚠️ IMPORTANTE - LEIA ANTES DE USAR:\n1. SEMPRE busque primeiro usando buscar_interesses1(telefone='...') para verificar se o lead existe\n2. Se encontrar um lead, use esta ferramenta para ATUALIZAR (não cria novo)\n3. Se NÃO encontrar lead, use inserir_interesse1 para criar um novo\n4. NUNCA crie leads duplicados - sempre verifique primeiro!\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n- etapa (string): Nova etapa do funil. Valores possíveis:\n  * 'interesse': Cliente demonstrou interesse\n  * 'reserva_confirmada': Reserva foi confirmada\n  * 'cancelado': Reserva foi cancelada\n  * 'convertido': Cliente foi convertido\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente (para atualizar se informado)\n- contexto (string): Contexto adicional sobre a etapa (será adicionado ao contexto existente)\n\nRetorna: Confirmação da atualização.\n\nExemplo: inserir_etapa1(telefone='5511999999999', etapa='reserva_confirmada')\n\nUse para manter o funil de vendas atualizado conforme o cliente avança na jornada. Use APENAS se o lead já existe (após buscar e encontrar).",
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Nova etapa do funil: interesse, reserva_confirmada, cancelado ou convertido`, 'string') }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Contexto adicional sobre a etapa (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -992
+      ],
+      "id": "a24a801a-6dfe-424a-8457-dccc9bf3d392",
+      "name": "inserir_etapa1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra um lead EXISTENTE como convertido na tabela de leads. Use quando um cliente completou uma conversão bem-sucedida (reserva confirmada e realizada, por exemplo).\n\n⚠️ IMPORTANTE - LEIA ANTES DE USAR:\n1. SEMPRE busque primeiro usando buscar_interesses1(telefone='...') para verificar se o lead existe\n2. Se encontrar um lead, use esta ferramenta para ATUALIZAR (não cria novo)\n3. Se NÃO encontrar lead, use inserir_interesse1 primeiro\n4. NUNCA crie leads duplicados - sempre verifique primeiro!\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente (para atualizar se informado)\n- etapa (string): Geralmente 'convertido'\n- contexto (string): Informações adicionais sobre a conversão (será adicionado ao contexto existente)\n- data_ultima_msg (string): Data da última interação\n\nRetorna: Confirmação do registro de conversão.\n\nExemplo: inserir_convertidos1(telefone='5511999999999', nome='João Silva', etapa='convertido')\n\nUse quando um cliente completou com sucesso a ação desejada (reserva realizada, etc). Use APENAS se o lead já existe (após buscar e encontrar).",
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "etapa",
+              "fieldValue": "convertido"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Informações sobre a conversão (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -992
+      ],
+      "id": "e476a621-aa8f-4571-a4ed-f50bce62137d",
+      "name": "inserir_convertidos1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra um interesse de um NOVO lead na tabela de leads. Use APENAS quando tiver CERTEZA que o lead NÃO EXISTE ainda.\n\n⚠️ IMPORTANTE - LEIA ANTES DE USAR:\n1. SEMPRE busque primeiro usando buscar_interesses1(telefone='...') para verificar se o lead já existe\n2. Se encontrar um lead existente, NÃO use esta ferramenta - use inserir_etapa1 ao invés\n3. Use esta ferramenta APENAS quando buscar_interesses1 retornar vazio (lead realmente não existe)\n4. NUNCA crie leads duplicados - sempre verifique primeiro!\n\nParâmetros OBRIGATÓRIOS:\n- telefone (string): Telefone do cliente (formato: 5511999999999)\n\nParâmetros OPCIONAIS:\n- nome (string): Nome do cliente (se disponível)\n- etapa (string): Geralmente 'interesse'\n- contexto (string): Descrição do interesse demonstrado\n- data_ultima_msg (string): Data da interação\n- canal_de_origem (string): Canal de origem (ex: 'WhatsApp')\n\nRetorna: Confirmação do registro de interesse.\n\nExemplo: inserir_interesse1(telefone='5511999999999', nome='Maria Silva', etapa='interesse', contexto='Cliente perguntou sobre disponibilidade para sábado à noite')\n\nUse APENAS quando tiver certeza que o lead não existe (após buscar e não encontrar).",
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Telefone do cliente (formato: 5511999999999)`, 'string') }}"
+            },
+            {
+              "fieldId": "etapa",
+              "fieldValue": "interesse"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Nome do cliente (opcional)`, 'string') }}"
+            },
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Descrição do interesse demonstrado (opcional)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        864,
+        -992
+      ],
+      "id": "bdd1ce13-8919-4bb3-9869-229359cdbf51",
+      "name": "inserir_interesse1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca documentos disponíveis do restaurante (cardápios, cartela de vídeos, informações). Use quando o cliente solicitar cardápio, menu, informações sobre o restaurante, mesas, ou cartela de vinhos/vídeos.\n\nParâmetros:\n- tipo (string, opcional): Tipo do documento ('cardapio', 'cartela_videos', 'restaurante'). Se não fornecido, retorna todos os tipos.\n\nRetorna: Array de documentos com:\n- id: ID do documento\n- tipo: Tipo do documento (cardapio, cartela_videos, restaurante)\n- titulo: Título do documento\n- descricao: Descrição do documento\n- arquivo_url: URL pública do arquivo PDF para download\n- ativo: Se está ativo\n\nTipos de documentos:\n- 'cardapio': Cardápios do restaurante\n- 'cartela_videos': Cartela de vídeos/displays\n- 'restaurante': Informações gerais do restaurante\n\nExemplo: buscar_documentos(tipo='cardapio')\n\nIMPORTANTE: \n- Quando o cliente solicitar cardápio, menu, informações ou cartela de vinhos, use esta tool para buscar o documento\n- Após buscar, informe ao cliente que você tem o documento e forneça a URL (arquivo_url) do documento para que ele possa acessar\n- Sempre use o documento mais recente e ativo (geralmente será o primeiro da lista retornada)",
+        "operation": "getAll",
+        "tableId": "documentos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -896
+      ],
+      "id": "32cc2b00-fe85-4734-878c-7bcff876c9d5",
+      "name": "buscar_documentos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a6d9aac-8565-4c58-abe3-8741393a5535",
+              "leftValue": "={{ $json.telefone }}",
+              "rightValue": "[   {} ]",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4016,
+        48
+      ],
+      "id": "ace46fbe-cf48-4e93-8e99-988c55023403",
+      "name": "If1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "action": "generate"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        4336,
+        -64
+      ],
+      "id": "b15ba86c-6564-4ee6-925f-1af3f11094ab",
+      "name": "Gerar sessionID"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtém sessionId dos itens de entrada de forma segura\nlet sessionid1 = null;\nlet sessionid2 = null;\n\ntry {\n  // Tenta obter do primeiro item disponível\n  if ($input.first && typeof $input.first === 'function') {\n    const firstItem = $input.first();\n    if (firstItem && firstItem.json) {\n      sessionid1 = firstItem.json.data || null;\n      sessionid2 = firstItem.json.sessionid || null;\n    }\n  }\n  \n  // Se não encontrou, tenta de $input.item\n  if (!sessionid1 && !sessionid2) {\n    if ($input.item && $input.item.json) {\n      sessionid1 = $input.item.json.data || null;\n      sessionid2 = $input.item.json.sessionid || null;\n    }\n  }\n} catch (error) {\n  // Se houver erro, continua com null\n}\n\n// Sempre retorna um objeto válido\nreturn [{ json: { sessionId: sessionid1 || sessionid2 || null } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4592,
+        96
+      ],
+      "id": "6c952e5f-4cce-4e90-8642-157f7b7352e1",
+      "name": "Code1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $now }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        48
+      ],
+      "id": "d89dce9d-3d22-436f-9955-270f1b62a64e",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "ade56c50-1520-4760-8df5-e99617d6d3ad",
+              "leftValue": "={{ $('Webhook EVO1').first().json.body.data.message.imageMessage.caption }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "65b29c2c-f3de-4312-8e93-4cc83b9cdbcd",
+      "name": "If3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5456,
+        448
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Code1').first().json.sessionId }}",
+        "messageData": "={{ $('Webhook EVO1').first().json.body.data.message.imageMessage.caption }}, {{ $json.content.replace(/\\n/g, \"\\\\n\").replace(/['\"]/g, '').trim()  }}",
+        "tail": true
+      },
+      "id": "e3c39058-183d-4e60-8196-0a9852c7c984",
+      "name": "Redis4",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        464
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Code1').first().json.sessionId }}",
+        "messageData": "={{ $('Webhook EVO1').first().json.body.data.message.imageMessage.caption }},{{ $('Analyze image').item.json.content }}",
+        "tail": true
+      },
+      "id": "ba8aaabb-0eb9-4bb5-b4f1-4c947c98b5f2",
+      "name": "Redis5",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        304
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d5a342e9-585b-42ea-be44-644adae10199",
+              "leftValue": "={{ $json.Redis2 }}",
+              "rightValue": "={{ $json.Redis1 }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fc4557e3-0dc9-4a59-93b9-b2c404234f3c",
+      "name": "Compara Get Memory1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6640,
+        144
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Code1').first().json.sessionId }}",
+        "messageData": "={{ $('Variáveis').first().json.mensagem }}",
+        "tail": true
+      },
+      "id": "2bd79bc5-016e-4789-b83c-e343c719bd97",
+      "name": "Text Memory1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        -32
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Code1').first().json.sessionId }}",
+        "messageData": "={{ $json.text }}",
+        "tail": true
+      },
+      "id": "ee6670e8-0178-4eda-b7dc-464a7fb70bcb",
+      "name": "Audio Memory1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        144
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f336a1ff-e577-489d-a739-1eb8bd509245",
+              "name": "Redis2",
+              "value": "={{ $json.propertyName }}",
+              "type": "string"
+            },
+            {
+              "id": "946d1420-e379-46e3-8fcd-3816340fbabb",
+              "name": "Redis1",
+              "value": "={{ $('Get Memory 1').item.json.propertyName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f511516b-dd27-472f-ae0b-07cf151c0254",
+      "name": "Edit Fields8",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6480,
+        144
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Code1').first().json.sessionId }}",
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "id": "6d5c0441-ac94-48ad-a972-ab187c56d26f",
+      "name": "Get Memory 1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        6000,
+        144
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "conversas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "keyValue": "={{ $json.telefone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4192,
+        192
+      ],
+      "id": "78f9395f-70d4-428c-85c0-a21978613cfe",
+      "name": "Get Dados",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d88c137-383f-4307-b3cc-1f6a560ea67b",
+              "name": "telefone",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "7e2f520e-4952-425b-82ca-792cc46680d4",
+              "name": "mensagem",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "15aaf749-8885-4dbd-8b13-c7d856669357",
+              "name": "nome",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "de1388b1-a6e4-42df-a6a5-7e9b4594f97d",
+              "name": "body.event",
+              "value": "={{ $('Webhook EVO1').item.json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "a3e9171c-f2e4-492d-b0b4-1c81f89797c1",
+              "name": "tipodamensagem",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "8cd41ab6-bf52-4864-a5f5-8ccd289b2ed1",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cbe60c2a-651a-47f6-9392-03717040510f",
+      "name": "Variáveis",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3536,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c33f9527-e661-49e5-8e5e-64f3b430928a",
+              "name": "tipo_da_mensagem",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.extendedTextMessage ? 'text' : '' }}{{ $('Webhook EVO1').item.json.body.data.message.conversation ? 'text' : '' }}{{ $('Webhook EVO1').item.json.body.data.message.audioMessage ? 'audio' : '' }}{{ $('Webhook EVO1').item.json.body.data.message.imageMessage ? 'image' : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "06eba1c9-cff0-4f68-b6da-6bb0092466b7",
+              "name": "conteudo_da_mensagem",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.extendedTextMessage?.text || '' }}{{ $('Webhook EVO1').item.json.body.data.message.imageMessage?.caption || '' }}{{ $('Webhook EVO1').item.json.body.data.message.conversation || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "b97f1af3-5361-46fc-9303-d644921231d8",
+              "name": "datahora_hora_da_msg",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.messageTimestamp.toDateTime('s').toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "dc3dc59c-90a3-4a45-bea2-de092c91083b",
+              "name": "message.content_url",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.audioMessage?.url || '' }}{{ $('Webhook EVO1').item.json.body.data.message.imageMessage?.url || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "8b01a818-a456-476e-bace-adefe2f04eb4",
+              "name": "message.event",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.key.fromMe ? 'outcoming' : 'incoming' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1e8cdee-d9c4-4d27-975c-9369a55bf8f4",
+      "name": "dados_para_atendimento_humano1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3360,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $item(0).$node[\"Compara Get Memory1\"].json[\"Redis2\"];\n\nif (!data) {\n  return [{ json: { mensagem_completa: \"\" } }];\n}\n\nlet array;\ntry {\n  array = Array.isArray(data) ? data : JSON.parse(data);\n} catch (err) {\n  return [{ json: { mensagem_completa: \"[Erro ao converter array]\" } }];\n}\n\nif (!Array.isArray(array)) {\n  return [{ json: { mensagem_completa: \"[Formato inválido]\" } }];\n}\n\nconst mensagem_completa = array.join(\" \");\nreturn [{ json: { mensagem_completa } }];\n"
+      },
+      "id": "0562445e-ecb1-47e3-af3a-e1d3682221a2",
+      "name": "Mensagem Completa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7488,
+        224
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "5820cbe0-f47c-4741-b47a-2783d29f7516",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        5408,
+        160
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "GSeydj58nvKIEdSr",
+          "name": "SaaS Lumi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Code1').first().json.sessionId }}",
+        "options": {}
+      },
+      "id": "53a7b36b-b1d0-4099-8847-bfd062762d8c",
+      "name": "Get Memory 2",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        6320,
+        144
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "12ca75af-9a41-491c-8077-ee79892e23f3",
+              "leftValue": "={{ $json.telefone }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7088,
+        112
+      ],
+      "id": "1bd9bdbd-b4b4-4006-a49c-aba29f88ce67",
+      "name": "If5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "estest",
+        "options": {}
+      },
+      "id": "6f5bcdc2-f888-48bf-ac51-c66a7130a215",
+      "name": "Webhook EVO1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -480
+      ],
+      "webhookId": "c76e1286-fea2-4aec-8765-2a6819a692f9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-fromme-1",
+              "leftValue": "={{ $('Webhook EVO1').item.json.body.data.key.fromMe || false }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -112
+      ],
+      "id": "7dcc38f6-0d59-441c-aa13-a367a26e5f38",
+      "name": "If Mensagem Recepcionista",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3152,
+        -48
+      ],
+      "id": "fb3ec8cc-51f6-4c53-8508-fcb29f3941ab",
+      "name": "Webhook EVO"
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Webhook EVO1').item.json.body.data.pushName || $json.nome || '' }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Webhook EVO1').item.json.body.data.key.remoteJid }}"
+            },
+            {
+              "fieldId": "data_ultima_msg",
+              "fieldValue": "={{ $('Webhook EVO1').item.json.body.date_time }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4176,
+        -64
+      ],
+      "id": "f674253c-e762-47c6-98d5-c6c49f05ec3a",
+      "name": "Supabase4",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $('Variáveis').item.json.telefone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3872,
+        48
+      ],
+      "id": "58bbcbda-cb8a-43cb-9d67-5d0df459a09f",
+      "name": "Supabase - SaaS Lumi",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "conversas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "numero",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid || $json.telefone || '' }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.data.pushName || $json.nome || '' }}"
+            },
+            {
+              "fieldId": "data_mensagem",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.date_time || $json.data_mensagem || $now.toISO() }}"
+            },
+            {
+              "fieldId": "mensagem_ia",
+              "fieldValue": "={{ $json.output || '' }}"
+            },
+            {
+              "fieldId": "mensagem_lead",
+              "fieldValue": "={{ $('Mensagem Completa').first().json.mensagem_completa || $json.mensagem_humano || '' }}"
+            },
+            {
+              "fieldId": "sessionid",
+              "fieldValue": "={{ $('Code1').first().json.sessionId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        9840,
+        -240
+      ],
+      "id": "7a3c8d38-9d5b-4560-8526-ed88f00ca5d3",
+      "name": "Criar - Conversas",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mesangem do Lead para a IA(se existir): {{ $('Mensagem Completa').first().json.mensagem_completa || $json.mensagem_humano || '' }}\n\nMensagem do lead para a atendente humana: {{ $json.mensagem_lead || '' }}\n\nResposta da IA para o Lead: {{ $('IA Atendente').first().json.output || '' }}\n\nMensagem do Atendente Humano (quando houver): {{ $json.mensagem_humano || '' }}\n\nTipo de Mensagem: {{ $json.tipo_mensagem || 'IA' }}\n",
+        "options": {
+          "systemMessage": "=🧠 SYSTEM MESSAGE — CÉREBRO | EST! EST!! EST!!! RISTORANTE\n\n📅 DATA ATUAL:\n{{ $now.weekdayLong }}, {{ $now.format('DD/MM/yyyy') }}, {{ $now.hour.toString().padStart(2, '0') }}:{{ $now.minute.toString().padStart(2, '0') }}\n\n📛 IDENTIDADE & MISSÃO\nVocê é o CÉREBRO da IA do restaurante Est! Est!! Est!!! Ristorante.  \nSua função é registrar, organizar e atualizar com precisão o histórico e os dados de cada cliente, servindo como **memória central para a IA Atendente**.\n\n---\n\n🧩 CAMPOS GERENCIADOS\n\n- `nome`: Nome do cliente\n- `telefone`: Identificador do cliente\n- `etapa`: Fase do funil (ex: interesse, reserva_confirmada, cancelado)\n- `contexto`: Histórico da intenção e decisões\n- `numero_pessoas`: Tamanho do grupo\n- `data_reserva`: Data solicitada\n- `horario_reserva`: Horário escolhido\n- `mesa_especifica`: Mesa escolhida pelo cliente (se aplicável)\n- `mesa_sugerida`: Mesa(s) sugerida(s) pela IA\n- `cancelamentos`: Histórico de cancelamentos (se houver)\n- `canal_de_origem`: WhatsApp, Instagram, etc.\n- `data_ultima_msg`: Última interação com a IA\n- `conversation_id`: ID do histórico de conversa\n\n---\n\n🧠 FUNCIONAMENTO E REGRAS\n\n1. Toda reserva sugerida pela IA é baseada na **disponibilidade real das mesas**, usando a tabela `mesas` e a Tool `buscar_reservas`.\n\n2. Nunca tente \"recriar\" ou deduzir qual mesa foi sugerida.  \nApenas registre com exatidão o que foi informado pela IA nos campos:\n   - `mesa_sugerida`\n   - ou `mesa_especifica`\n\n3. Ao receber um novo dado:\n   - Leia o `contexto` atual com atenção\n   - Atualize os campos individualmente\n   - **Não apague dados anteriores** a menos que estejam sendo sobrescritos\n   - Se um campo vier vazio, mantenha o valor anterior\n\n4. Atualize a etapa sempre que a jornada do cliente avançar:\n   - De `interesse` → para `reserva_confirmada` ou `cancelado`\n\n5. **MENSAGENS DE RECEPCIONISTA DO RESTAURANTE:**\n   - Quando receber uma mensagem com tipo_mensagem: HUMANO, identifique que foi enviada pela RECEPCIONISTA DO RESTAURANTE\n   - **SEMPRE** inclua essas mensagens no contexto, indicando claramente que foram enviadas pela recepcionista\n   - **FORMATO OBRIGATÓRIO** para atualizar contexto: [RECEPCIONISTA entrou em contato e disse: ...] Cliente respondeu: ... ou [RECEPCIONISTA DO RESTAURANTE disse: ...]\n   - **IMPORTANTE**: Quando a recepcionista enviar uma mensagem, você DEVE atualizar o contexto mencionando explicitamente que A RECEPCIONISTA entrou em contato ou A RECEPCIONISTA DO RESTAURANTE disse\n   - Mantenha o histórico completo da conversa, incluindo TODAS as interações (IA e recepcionista)\n   - Se a recepcionista confirmar, alterar ou cancelar uma reserva, atualize o contexto e a etapa correspondente\n   - **QUANDO RECEPCIONISTA ATENDE**: A IA para de responder automaticamente. Todas as mensagens do cliente durante esse período devem ser salvas no contexto para que a IA saiba o que aconteceu quando voltar a atender\n\n---\n\n🔄 EXEMPLOS DE USO\n\n✔️ Atualizar etapa:\n\n```json\n{\n  \"telefone\": \"5531999999999@...\",\n  \"etapa\": \"reserva_confirmada\",\n  \"data_ultima_msg\": \"2025-07-09T10:00:00\"\n}\n✔️ Atualizar contexto (com mensagem de humano):\n\n```json\n{\n  \"telefone\": \"5531999999999@...\",\n  \"contexto\": \"Cliente confirmou reserva para 9 pessoas às 19h. IA sugeriu M9+M10+M11. [ATENDENTE HUMANO confirmou a reserva e informou sobre o terraço]. Cliente aceitou. Deseja área do terraço.\"\n}\n```\n\n✔️ Registrar cancelamento:\n\n```json\n{\n  \"telefone\": \"5531999999999@...\",\n  \"etapa\": \"cancelado\",\n  \"contexto\": \"Cliente cancelou reserva de 4 pessoas para sábado às 12h.\"\n}\n```\n\n🎯 OBJETIVO FINAL\nSer a memória fiel e consistente do relacionamento com o cliente, garantindo que a IA Atendente ofereça um atendimento contínuo, personalizado e com base em dados reais e atualizados, incluindo todas as interações (IA e humanos)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        8544,
+        -368
+      ],
+      "id": "68dc0acd-65d4-4c91-9ca0-02cccb11df1c",
+      "name": "Cerebro da IA",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        8736,
+        832
+      ],
+      "id": "d25e7291-4fae-42e5-a719-fac7ef543300",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "GSeydj58nvKIEdSr",
+          "name": "SaaS Lumi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Code1').item.json.sessionId }}",
+        "tableName": "n8n_chat_histories_agendamento"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        8928,
+        912
+      ],
+      "id": "8a0138a1-80cf-4575-9f05-91aebdbd6656",
+      "name": "Postgres Chat Memory1",
+      "credentials": {
+        "postgres": {
+          "id": "2Z5MJhuHcz33PCiu",
+          "name": "Postgres_bistro"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        9056,
+        912
+      ],
+      "id": "4e92c37a-b0e4-4e69-b46d-b8d312ebb19b",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini-2025-04-14",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        8320,
+        -144
+      ],
+      "id": "d804c583-9b87-4295-87b1-57eec9e54ac9",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "GSeydj58nvKIEdSr",
+          "name": "SaaS Lumi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Code1').first().json.sessionId || $('Getarow9').first().json.sessionid }}",
+        "tableName": "n8n_chat_histories_cerebro"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        8480,
+        -160
+      ],
+      "id": "8de6d8c4-a73b-4553-95b8-b32f751cf5bb",
+      "name": "Postgres Chat Memory4",
+      "credentials": {
+        "postgres": {
+          "id": "2Z5MJhuHcz33PCiu",
+          "name": "Postgres_bistro"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        8608,
+        -144
+      ],
+      "id": "9a4358b9-707f-4223-b784-9d8bb23e9a37",
+      "name": "Calculator4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "contexto",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8816,
+        -368
+      ],
+      "id": "3b7b7373-27dc-4a0f-b6bd-51713eb5a1d6",
+      "name": "Conhecimento",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "conversas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "numero",
+              "fieldValue": "={{ $('Preparar Mensagem Humano IA').item().json.telefone || $json.telefone || $('Webhook EVO1').item.json.body.data.key.remoteJid || '' }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $json.nome || $('Webhook EVO1').item.json.body.data.pushName || 'Recepcionista' }}"
+            },
+            {
+              "fieldId": "data_mensagem",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "mensagem_ia",
+              "fieldValue": "={{ $('Preparar Mensagem Humano IA').first().json.mensagem_humano || $json.mensagem_humano || '' }}"
+            },
+            {
+              "fieldId": "conversation_id",
+              "fieldValue": "={{ $json.conversation_id || '' }}"
+            },
+            {
+              "fieldId": "tipo_mensagem",
+              "fieldValue": "ATENDENTEHUMANARESPONDEU"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        9328,
+        -336
+      ],
+      "id": "ecd8bfb0-eec2-4322-ac7f-7eb2bb6e7d09",
+      "name": "Salvar Mensagem Recepcionista IA",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8256,
+        656
+      ],
+      "id": "4bfca94f-118e-4e16-90cb-0713281078ee",
+      "name": "GET Conhecimento",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c5ccbc9-69d1-4b13-a7c3-e6945bc8c655",
+              "name": "data",
+              "value": "={{ $('Webhook EVO1').first().json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3076e51d-5651-42bd-bd96-f163a3923fb8",
+      "name": "Converte Base64",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5120,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "fileName": "file.ogg",
+          "mimeType": "application/ogg"
+        }
+      },
+      "id": "4b1a15d8-394c-42e3-a5d3-e5f717b33b70",
+      "name": "Converte Audio",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        5248,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c5ccbc9-69d1-4b13-a7c3-e6945bc8c655",
+              "name": "data",
+              "value": "={{ $('Webhook EVO1').first().json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "18eda04a-5f66-48c8-9d86-d979a32e3a6c",
+      "name": "Convert Base64",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4928,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "fileName": "file.png",
+          "mimeType": "image/png"
+        }
+      },
+      "id": "4947848c-5db8-43de-b588-cf272a357efa",
+      "name": "Converte Imagem",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        5120,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Code1').first().json.sessionId }}"
+      },
+      "id": "a36c977b-3fd9-4949-9a3f-3c60e6703584",
+      "name": "Deleta Session ID",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        10320,
+        -176
+      ],
+      "credentials": {
+        "redis": {
+          "id": "v7V6gGEfMZa6VkmD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "32f25dec-c254-4114-b453-7790468eec87",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "TRUE",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1584,
+        -112
+      ],
+      "id": "5cf28488-efed-4739-9ace-bddf2490d936",
+      "name": "If2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "atendimento_humano",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -64
+      ],
+      "id": "dcb24265-3742-4390-ac63-37a56afeeb37",
+      "name": "VerificaAtendimentoHumano",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-nano-2025-04-14",
+        "options": {}
+      },
+      "id": "2b7a33a6-e329-47d3-ba7f-f87310406679",
+      "name": "OpenAI3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        10048,
+        1008
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "GSeydj58nvKIEdSr",
+          "name": "SaaS Lumi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6b5f5c35-6910-4d4e-9823-ae7fd7eddf96",
+      "name": "Loop Over Items3",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        10496,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"messages\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\"messages\"]\n}"
+      },
+      "id": "a4124675-9fb0-4e97-a39c-f1f34cbdc6cb",
+      "name": "OutputParser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        10176,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Whatsapp message to be splitted and formated: {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Por favor, gere a saída no seguinte formato JSON e NADA MAIS, sem comentários ou texto antes/depois, apenas o JSON puro:\n\n{\n  \"messages\": [\n    \"splitedMessage\",\n    \"splitedMessage\",\n    \"splitedMessage\"\n  ]\n}\n\n- As mensagens devem ser divididas de forma natural, sem separar frases no meio.\n- Nunca retorne uma mensagem vazia.\n- Sempre que houver um link, crie um \"splitedMessage\" só para o link.\n\nATENÇÃO:  \nA RESPOSTA DEVE SER EXCLUSIVAMENTE UM JSON VÁLIDO COMO NO EXEMPLO ACIMA.  \nNÃO escreva explicações, comentários, ou qualquer outro texto.  \nNão coloque markdown, tags, barras, aspas extras, nada além do JSON.\n\n"
+            }
+          ]
+        }
+      },
+      "id": "10bfabc5-3d2c-43c8-a4fb-5aa6a7a6f068",
+      "name": "Parser  Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        10016,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-audio",
+        "instanceName": "Capilar",
+        "remoteJid": "={{ $('Variáveis').item.json.telefone }}",
+        "media": "={{ $json.data }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        10528,
+        624
+      ],
+      "id": "1cd5ee48-7f14-4e00-b23d-bbe02d55c836",
+      "name": "Evolution API5",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.messages",
+        "options": {
+          "destinationFieldName": "output"
+        }
+      },
+      "id": "7fca3b95-8fa8-483f-8dbd-92a09f981406",
+      "name": "Split de Mensagem",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        10320,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        10320,
+        624
+      ],
+      "id": "3441e615-e6e5-44fc-8660-413d3995354a",
+      "name": "Extract from File",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e6012d0d-e01e-4c18-a2df-9c9b1c815fa4",
+              "leftValue": "={{ $json.output.length }}",
+              "rightValue": 5000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9872,
+        736
+      ],
+      "id": "8dc6bc4d-4fc8-4ef1-80dc-dee193127308",
+      "name": "Áudio ou Mensagem",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "voice_id": {
+          "__rl": true,
+          "value": "Mv4hBCiEndOun9o5zrjw",
+          "mode": "list",
+          "cachedResultName": "IA - Tatiana"
+        },
+        "additionalFields": {
+          "stability": 0.8,
+          "style": 0.2
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        10096,
+        624
+      ],
+      "id": "c56864a1-ac91-440a-956d-fbd9fdf72922",
+      "name": "ElevenLabs",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "id": "53699c8c-a145-4346-a2c5-82cc76da627e",
+      "name": "Aguarda",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6160,
+        144
+      ],
+      "webhookId": "dec09ac1-7d3d-4b49-bd78-095b8e4ec15e"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid || $json.telefone || '' }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "conversation_id",
+              "fieldValue": "={{ $('Code1').first().json.sessionId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10080,
+        -80
+      ],
+      "id": "b95400dd-fe82-4de8-9503-7ae2593f7373",
+      "name": "Update a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "52aaf749-fe4f-44e4-880e-15b2bfc027f1",
+                    "leftValue": "={{ $('Webhook EVO1').first().json.body.data.messageType }}",
+                    "rightValue": "extendedTextMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "e514e613-fd6a-48bd-b0ae-bae2448c810e",
+                    "leftValue": "={{ $('Webhook EVO1').first().json.body.data.messageType }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook EVO1').first().json.body.data.messageType }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2fb21f2a-4db1-4ba2-a6a3-4edcf8a875c4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "c0e434dd-1268-421d-b81b-3a5e90ed9550",
+                    "leftValue": "={{ $('Webhook EVO1').first().json.body.data.messageType }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6a6ac780-6363-4720-8473-38d488f6144a",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        4848,
+        64
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "locks",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "condition": "eq",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "locked",
+              "fieldValue": "TRUE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        7120,
+        336
+      ],
+      "id": "88746059-3aea-4e29-a454-317d322ab1b5",
+      "name": "Update a row1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "locks",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "locked",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "numero",
+              "fieldValue": "={{ $('Variáveis').first().json.telefone }}"
+            },
+            {
+              "fieldId": "retrycount",
+              "fieldValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        7264,
+        96
+      ],
+      "id": "4ba79b1f-b141-4a4b-b4f8-2669d9e06dd7",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Medica",
+        "remoteJid": "={{ $('Variáveis').first().json.telefone }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {
+          "delay": 1200,
+          "linkPreview": false
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        11440,
+        912
+      ],
+      "id": "a6fc2019-83d8-44dd-a39a-c0e914ef9256",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "8x5IVzbNqi1VepDR",
+          "name": "EvoLumi- Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "locks",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "condition": "eq",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "locked",
+              "fieldValue": "false"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10528,
+        -176
+      ],
+      "id": "c7a4229f-b44a-40ef-bbe8-4021bc66e6a9",
+      "name": "Update a row2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "locks",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "condition": "eq",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "retrycount",
+              "fieldValue": "=0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10688,
+        -176
+      ],
+      "id": "5770eec1-69b4-4270-85ff-035a65f0dc39",
+      "name": "Update a row3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=Passar a descrição da Imagem.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "a0962fcd-a22d-4f68-a71d-f65d61a4b28a",
+      "name": "Analyze image",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        5296,
+        448
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "GSeydj58nvKIEdSr",
+          "name": "SaaS Lumi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $('Variáveis').first().json.telefone || '' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8288,
+        -304
+      ],
+      "id": "bc239f56-08aa-41af-8508-6d871f1e8aaf",
+      "name": "GET Conhecimento2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=RESPONDA ESTA Mensagem:{{ $('Mensagem Completa').first().json.mensagem_completa }}\n\n\nAqui tem o Contexto de toda a conversa com o lead que entrou em conversa com você: {{ $('GET Conhecimento').first().json.contexto || $json.contexto || '' }}\n",
+        "options": {
+          "systemMessage": "=\nNúmero do lead: {{ $('Webhook EVO1').first().json.body.data.key.remoteJid }}\nNome do lead: {{ $('Webhook EVO1').first().json.body.data.pushName }}\n**System Message para a Recepcionista Digital (Análise, Geração e Ação)**\n\nVocê é a **Recepcionista Digital** do renomado restaurante de alta gastronomia italiana **Est! Est!! Est!!!**. Seu objetivo é conduzir o cliente através do processo de reserva de forma calorosa, precisa e eficiente, utilizando todas as ferramentas disponíveis e respeitando as Regras de Negócio Inegociáveis (MCPS).\n\n### 1. DADOS DE CONTEXTO\nDATA ATUAL: {{ $now.weekdayLong }}, {{ $now.format('DD/MM/yyyy') }}, {{ $now.hour.toString().padStart(2, '0') }}:{{ $now.minute.toString().padStart(2, '0') }}\nContexto da conversa: {{ $json.contexto }}\n\n### 2. TOM DE VOZ E PERSONALIDADE\n* **Tom:** Sempre simpática, positiva, acolhedora e prestativa. Use um toque de elegância italiana.\n* **Missão:** Facilitar a vida do cliente, garantir o melhor uso das mesas, evitar qualquer conflito de reservas e encantar cada pessoa.\n\n### 3. CONHECIMENTO BASE E REGRAS GERAIS (Para perguntas GERAIS)\n* **Culinária/Chef:** Culinária italiana autêntica e tradicional, comandada pelo Chef Simone Biondi.\n* **Destaques:** Massa fresca artesanal, a maior carta de Grappa do Brasil.\n* **Ambiente:** Rústico, sofisticado e moderno.\n* **Tolerância:** 15 minutos de tolerância.\n* **Fotos/Visual:** Não envie fotos. Direcione o cliente para o nosso *portfólio visual completo* no Instagram: **@estcucina**.\n\n### 4. REGRAS DE NEGÓCIO INEGOCIÁVEIS (MCPS)\n\nVocê **DEVE** aplicar estas regras na etapa de **Verificação de Disponibilidade (Ponto 3)**:\n1.  **Apenas Uso Pessoal:** Salão Externo, Segundo Andar Externo Coberto e Sala \"Cinema\" são estritamente para uso pessoal (não corporativo).\n2.  **Apenas Eventos:** O **Terraço (61 a 82)** e o **Empório (41 a 52)** só podem ser reservados para **EVENTOS** (não para uso normal).\n3.  **Junções:** Mesas não podem ser unidas, exceto onde explicitamente permitido nas regras (dados retornados por `listar_mesas`).\n4.  **Mídia Corporativa:** Uso de TV/Mídia **NÃO** é permitido em Mesas 8, 9, 10, 11 (Salão Cristal) para uso corporativo.\n5.  **Exceção da TV:** Apenas a Mesa 7 (Salão Cristal) e o Salão Bandeira possuem TV e são mais adequados para mídia. Avise o cliente.\n\n### 5. FLUXO DE ATENDIMENTO OTIMIZADO E USO DAS TOOLS\n\n**FLUXO DE RESERVA:**\n\n1.  **Cumprimente** o cliente com calor humano.\n    * Exemplo: “Olá! Seja muito bem-vindo(a) ao Est! Est!! Est!!! Ristorante. Vamos garantir a melhor experiência para você!”\n2.  **PRÉ-CONSULTA (Coleta de Dados)**\n    * Pergunte o **número de pessoas**.\n    * Após a resposta, pergunte **dia, turno (almoço ou jantar) e horário**.\n3.  **Verificação de Disponibilidade (Ação + Regras)**\n    * Use **`listar_mesas`** (para obter todas as regras de mesa) e **`buscar_reserva`** (para obter as reservas confirmadas).\n    * Cruze esses dados para encontrar mesas livres, aplicando as **Regras de Negócio Inegociáveis (MCPS)** (Ponto 4).\n    * **Sugira a melhor opção** (mesa única ou combinação válida), sempre de forma positiva.\n    * **Se disponível:** Responda perguntando se pode prosseguir. Exemplo: “Ótima escolha! Temos a Mesa [X] disponível para [Y] pessoas. Posso reservar para você?”\n    * **Se não houver:** Sugira proativamente outro horário ou data.\n    * **Se for Ambíguo (ex: 'evento'):** Pergunte o tipo de uso (pessoal vs. corporativo) antes de sugerir a mesa, para aplicar a Regra 1.\n4.  **Coleta de Dados Complementares**\n    * Só peça nome e telefone **depois** da confirmação do interesse.\n5.  **Registro e Confirmação**\n    * Após a coleta de dados, use **`registrar_reserva`** com todos os campos obrigatórios.\n    * Confirme de forma calorosa.\n    * Exemplo: “Sua reserva está confirmada para [Dia/Turno/Horário], na(s) mesa(s) [Mesa(s)]. Estamos ansiosos para te receber!”\n\n**FLUXO DE ALTERAÇÃO/CANCELAMENTO:**\n\n6.  **Remarcação de Reserva**\n    * Se o cliente quiser **remarcar** (trocar data, horário, mesa, etc.), use a ferramenta **`update_reserva`** informando o ID da reserva e os novos dados.\n    * **Nunca** crie uma nova reserva.\n    * Confirme a alteração para o cliente.\n7.  **Cancelamento**\n    * Se o cliente pedir cancelamento, use **`cancelar_reserva`** com o ID correspondente. Seja sempre gentil e positivo.\n\n### 6. EXEMPLOS DE CHAMADAS DE TOOLS\n\n* Listar mesas: `{\"tool\": \"listar_mesas\"}`\n* Buscar reservas: `{\"tool\": \"buscar_reserva\", \"data_reserva\": \"[YYYY-MM-DD]\", \"turno\": \"[almoco ou jantar]\"}`\n* Registrar reserva: `{\"tool\": \"registrar_reserva\", \"nome\": \"[Nome]\", \"telefone\": \"[Telefone]\", ...}`\n* Atualizar (remarcar) reserva: `{\"tool\": \"update_reserva\", \"id\": \"xxxx\", \"data_reserva\": \"2025-07-20\", ...}`\n* Cancelar reserva: `{\"tool\": \"cancelar_reserva\", \"id\": \"xxxx-xxxx-xxxx-xxxx\"}`"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        8880,
+        544
+      ],
+      "id": "7dacc64e-85f6-4adf-ba70-ff8c6556ec09",
+      "name": "IA Atendente"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+              "name": "mensagem_humano",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.conversation || $('Webhook EVO1').item.json.body.data.message.extendedTextMessage?.text || $json.messageText || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "g2b3c4d5-e6f7-8901-bcde-f12345678901",
+              "name": "telefone",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.key.remoteJid || $('Webhook EVO1').item.json.body.data.key.participant || $json.telefone || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "h3c4d5e6-f7a8-9012-cdef-123456789012",
+              "name": "tipo_mensagem",
+              "value": "HUMANO",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2368,
+        -720
+      ],
+      "id": "34538e90-cc33-4873-bdfb-edc9adf96f5b",
+      "name": "Preparar Mensagem Humano IA"
+    },
+    {
+      "parameters": {
+        "content": "# Compara as Mensagens",
+        "height": 80,
+        "width": 616,
+        "color": 5
+      },
+      "id": "82008360-8a1f-47f3-888c-634f04b4c3cd",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5968,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 580,
+        "width": 1180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3536,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "402547e3-b3b6-45cf-8d67-2fba8eae8f29",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "content": "# Gera/Consulta sessionId e Lead",
+        "height": 120,
+        "width": 436,
+        "color": 5
+      },
+      "id": "4e170760-1e92-4d8a-a4b5-ef7342021e55",
+      "name": "Sticky Note23",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 616,
+        "width": 1040,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2016,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "d39a12b8-db78-40ae-b76b-8be204d564c5",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 440,
+        "width": 632,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3072,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "ecea30a2-4480-464a-8939-3b457e15b62f",
+      "name": "Sticky Note42"
+    },
+    {
+      "parameters": {
+        "content": "# Captação de Dados",
+        "height": 100,
+        "width": 330,
+        "color": 5
+      },
+      "id": "bb469310-1e13-4e96-9a05-bf17c14647d4",
+      "name": "Sticky Note43",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3088,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Classifica a Mensagem",
+        "height": 80,
+        "width": 416,
+        "color": 5
+      },
+      "id": "f6639369-41e6-41b8-847e-7c7953720ebc",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4848,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Verifica se é Atendimento Humano e se o numero está travado.",
+        "height": 120,
+        "width": 656,
+        "color": 5
+      },
+      "id": "1aa8cfa5-1c2f-41bc-b681-dce273761a8a",
+      "name": "Sticky Note46",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 440,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        -688
+      ],
+      "typeVersion": 1,
+      "id": "3ec60601-7ee0-4aef-8781-756915316ff1",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "content": "# Webhook",
+        "height": 80,
+        "width": 196,
+        "color": 5
+      },
+      "id": "39a6b14a-e590-4382-9641-3ce58da868fe",
+      "name": "Sticky Note67",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -672
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 424,
+        "width": 892,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "c61f9e1a-e008-4992-a533-08968e909974",
+      "name": "Sticky Note28"
+    },
+    {
+      "parameters": {
+        "content": "# Confere se tem alguma execução",
+        "height": 80,
+        "width": 656,
+        "color": 5
+      },
+      "id": "9dacccd0-2dda-4ac4-94ab-9ff16fd6d82f",
+      "name": "Sticky Note52",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 780,
+        "width": 1000,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4816,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "45870794-bf65-4ed0-989a-3f4dff38da99",
+      "name": "Sticky Note29"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 556,
+        "width": 1372,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        9552,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "dea915f0-360f-49c8-8f5a-be3fb5deac1c",
+      "name": "Sticky Note54"
+    },
+    {
+      "parameters": {
+        "content": "# Cadastra Conversas",
+        "height": 80,
+        "width": 450,
+        "color": 5
+      },
+      "id": "d656fa66-5bfd-492c-b70d-b042f8d8d11c",
+      "name": "Sticky Note55",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9568,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Libera do Loop de Verificação/Trava de Segurança",
+        "height": 148,
+        "width": 378,
+        "color": 5
+      },
+      "id": "bf63aad0-c260-4b8c-a030-ff2d56a1a910",
+      "name": "Sticky Note57",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10480,
+        -368
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Junta a Mensagem com o Conhecimento",
+        "height": 180,
+        "width": 456,
+        "color": 5
+      },
+      "id": "89b47000-0ffb-4e7a-85b2-fb0118cb334b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7472,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300,
+        "width": 880,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5936,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "dd4fb03f-0228-4409-a9e7-4a071535fb6f",
+      "name": "Sticky Note30"
+    },
+    {
+      "parameters": {
+        "content": "# Trava de Segurança",
+        "height": 80,
+        "width": 396,
+        "color": 5
+      },
+      "id": "618b6b53-3c75-47dd-9745-b15bc037f2af",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6896,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 440,
+        "width": 540,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6864,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "4e753c93-09cc-4aac-b4e3-ec8d963b6e47",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "content": "# Deleta SessionID\n",
+        "height": 116,
+        "width": 206,
+        "color": 5
+      },
+      "id": "2db6ff13-3b05-4420-b67e-bc5f001314ec",
+      "name": "Sticky Note58",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10240,
+        -336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 552,
+        "width": 588,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7424,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "7aa4a446-9d3f-46c8-94f3-0dfa20b734cd",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 816,
+        "width": 2220,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        9520,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "6df12ef9-8150-48be-b9c4-667bc96e96dc",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "# Divisão de Mensagens Inteligente - Texto e Áudio",
+        "height": 100,
+        "width": 736,
+        "color": 5
+      },
+      "id": "3213990a-32d2-4cae-bbe9-0e411fa30ee4",
+      "name": "Sticky Note19",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9552,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 656,
+        "width": 1388,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        8112,
+        -576
+      ],
+      "typeVersion": 1,
+      "id": "37a56572-8c2b-4461-ab51-0cc8b9a0a7d8",
+      "name": "Sticky Note59"
+    },
+    {
+      "parameters": {
+        "content": "# Cérebro: Gera o Contexto/Conhecimento",
+        "height": 80,
+        "width": 750,
+        "color": 5
+      },
+      "id": "380a038a-a7d3-4e7b-a4a9-6951dc171c84",
+      "name": "Sticky Note60",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8192,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Envia a Mensagem do CRM",
+        "width": 336,
+        "color": 5
+      },
+      "id": "06a772e9-35b4-489d-8e8e-fe8b42a05401",
+      "name": "Sticky Note61",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2224,
+        -912
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 512,
+        "width": 1164,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        -960
+      ],
+      "typeVersion": 1,
+      "id": "f9c5b246-580d-4142-ba14-03cc9bf18787",
+      "name": "Sticky Note36"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1076,
+        "width": 1612,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7792,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "6016f9c2-3917-4109-85ab-66cd442e3635",
+      "name": "Sticky Note64"
+    },
+    {
+      "parameters": {
+        "tableId": "atendimento_humano",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.sender }}"
+            },
+            {
+              "fieldId": "ativo",
+              "fieldValue": "TRUE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        -624
+      ],
+      "id": "77ac17bd-92c2-4adf-9187-ea7f398d94a6",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "atendimento_humano",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook EVO1').first().json.body.sender }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ativo",
+              "fieldValue": "TRUE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        -784
+      ],
+      "id": "37aa5f2d-fdf3-40cc-9be0-19e0270b6ae0",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "df54ce7f-582f-4ae4-8b8c-bb2c601a2c6a",
+              "leftValue": "={{ $json.ativo }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2720,
+        -720
+      ],
+      "id": "40b8934d-b2bd-43bf-8510-983603299833",
+      "name": "If10",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "atendimento_humano",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2576,
+        -720
+      ],
+      "id": "43b73e32-458f-45a9-a403-8f439abc8769",
+      "name": "VerificaAtendimentoHumano2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "eLawV1rvxMkA0Z18",
+          "name": "Supabase Dra. Glenda"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2416,
+        160
+      ],
+      "id": "0ee5b9a8-b6bc-444d-9812-86bbc1455e77",
+      "name": "Wait 10s",
+      "webhookId": "2cbf73a6-51ec-46de-bffb-f0ad2cbb5238"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "locks",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "keyValue": "={{ $('Webhook EVO1').item.json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        32
+      ],
+      "id": "56c07d41-6828-475d-ae1f-19e1f224b3c1",
+      "name": "Get a row1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.Locks\nSET retrycount = COALESCE(retrycount, 0) + 1\nWHERE numero = '{{ $('Webhook EVO1').first().json.body.data.key.remoteJid }}' ;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2576,
+        160
+      ],
+      "id": "b7317a13-1453-41ab-aff2-351ecdb65ee7",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "2Z5MJhuHcz33PCiu",
+          "name": "Postgres_bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a89afe1-268d-4dab-b1a7-bccf6090ef31",
+              "leftValue": "={{ $('Get a row1').item.json.retrycount }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2768,
+        224
+      ],
+      "id": "028ff1ac-d786-4284-af38-b19600e91756",
+      "name": "If11",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e8095bb3-ca6c-4d44-893f-160960042de4",
+              "leftValue": "={{$json[\"locked\"]}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2256,
+        48
+      ],
+      "id": "3248a0c9-2932-4e21-a73c-6d22b33daddd",
+      "name": "If12",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+              "name": "mensagem_lead",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.message.conversation || $('Webhook EVO1').item.json.body.data.message.extendedTextMessage?.text || $json.messageText || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "g2b3c4d5-e6f7-8901-bcde-f12345678901",
+              "name": "telefone",
+              "value": "={{ $('Webhook EVO1').item.json.body.data.key.remoteJid || $('Webhook EVO1').item.json.body.data.key.participant || $json.telefone || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "h3c4d5e6-f7a8-9012-cdef-123456789012",
+              "name": "tipo_mensagem",
+              "value": "AtendimentoHumano",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        -144
+      ],
+      "id": "c58e22ef-d56a-4ee0-93f0-c39752fd99eb",
+      "name": "mensagemleadAH"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "conversas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "numero",
+              "keyValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4400,
+        -704
+      ],
+      "id": "1837f72f-11c0-4751-b803-9f993576b6ba",
+      "name": "Getarow9",
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "conversas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "numero",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.data.key.remoteJid || $json.telefone || '' }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.data.pushName || $json.nome || '' }}"
+            },
+            {
+              "fieldId": "data_mensagem",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.date_time || $json.data_mensagem || $now.toISO() }}"
+            },
+            {
+              "fieldId": "mensagem_lead",
+              "fieldValue": "={{ $('Webhook EVO1').first().json.body.data.message.conversation || $('Webhook EVO1').item.json.body.data.message.extendedTextMessage?.text || $json.messageText || '' }}"
+            },
+            {
+              "fieldId": "tipo_mensagem",
+              "fieldValue": "LeadParaAtendimentoHumano"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        9312,
+        -192
+      ],
+      "id": "bf92f97b-8d1c-4f5f-a11c-a46496bcd062",
+      "name": "Salvar Mensagem Lead Travado",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f9849ee0-5ccf-4f57-aa22-f484598831b0",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "presence.update",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        -384
+      ],
+      "id": "205c0245-ed99-42d9-90f3-6d45c40d9abd",
+      "name": "If",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $json.numero }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        7520,
+        -480
+      ],
+      "id": "5dab3aea-f242-4337-a685-b02083de97ce",
+      "name": "GET Conhecimento3",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://webh.olifant.cloud/mcp/bistro",
+        "include": "selected",
+        "includeTools": [
+          "buscar_documentos",
+          "cancelar_reserva",
+          "update_reserva",
+          "listar_mesas",
+          "buscar_reserva",
+          "registrar_reserva"
+        ],
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        9168,
+        896
+      ],
+      "id": "39b604c7-9b1e-479f-8c22-2786608cea52",
+      "name": "BISTRO"
+    },
+    {
+      "parameters": {
+        "content": "# LLM'S DO SISTEMA",
+        "height": 180,
+        "width": 456,
+        "color": 5
+      },
+      "id": "0583231e-4561-4986-bff3-38b5d1748a22",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7904,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-fromme-1",
+              "leftValue": "={{ $('Webhook EVO1').item.json.body.data.key.fromMe || false }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9136,
+        -288
+      ],
+      "id": "389d7e3c-a6e1-47ab-8bbd-6389aacd2430",
+      "name": "If Mensagem Recepcionista1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "32f25dec-c254-4114-b453-7790468eec87",
+              "leftValue": "={{ $('Mensagem Completa').first().json.mensagem_completa }}",
+              "rightValue": " [ { } ]",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8992,
+        -368
+      ],
+      "id": "665d487f-4aec-4b58-9e37-58dd9c4cfd4b",
+      "name": "If4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://webh.olifant.cloud/mcp/mcpsaas",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        8768,
+        -176
+      ],
+      "id": "f44abc1c-38db-404f-9f81-c6335aae39da",
+      "name": "SAAS1"
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "Medica",
+        "remoteJid": "={{ $('Variáveis').first().json.telefone }}",
+        "delay": 20000
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        11072,
+        1008
+      ],
+      "id": "e69dbd37-7775-42cf-80ee-8d8d3e81fd2e",
+      "name": "Enviar presen a3",
+      "credentials": {
+        "evolutionApi": {
+          "id": "8x5IVzbNqi1VepDR",
+          "name": "EvoLumi- Bistro"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "Medica",
+        "remoteJid": "={{ $('Variáveis').first().json.telefone }}",
+        "delay": 15000
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        11072,
+        848
+      ],
+      "id": "dc113d90-fda4-4af0-9903-0741473837a8",
+      "name": "Enviar presen a2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "8x5IVzbNqi1VepDR",
+          "name": "EvoLumi- Bistro"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "Medico",
+        "remoteJid": "={{ $('Variáveis').first().json.telefone }}",
+        "delay": 8000
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        11072,
+        736
+      ],
+      "id": "eaab93e6-f60a-4896-9220-8a567a7a0c15",
+      "name": "Enviar presen a1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "8x5IVzbNqi1VepDR",
+          "name": "EvoLumi- Bistro"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "Medica",
+        "remoteJid": "={{ $('Variáveis').first().json.telefone }}",
+        "delay": 2000
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        11072,
+        528
+      ],
+      "id": "0341e6e1-7854-4110-b444-8841face45e1",
+      "name": "Enviar presen a",
+      "credentials": {
+        "evolutionApi": {
+          "id": "8x5IVzbNqi1VepDR",
+          "name": "EvoLumi- Bistro"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.length }}",
+                    "rightValue": 30,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "02697b0d-7744-4f5b-b691-adb800d13a12"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ecf5afcf-d87e-43bc-a5e9-fb67db9242e0",
+                    "leftValue": "={{ $json.output.length }}",
+                    "rightValue": 30,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c2eb73e9-5159-4230-b5a8-51c709981150",
+                    "leftValue": "={{ $json.output.length }}",
+                    "rightValue": 150,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "82cc06a4-75d6-44da-8b07-56544bcd601a",
+                    "leftValue": "={{ $json.output.length }}",
+                    "rightValue": 300,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        10768,
+        816
+      ],
+      "id": "42e75aae-1240-4ee3-9fa4-a9ef1748d437",
+      "name": "Switch4",
+      "alwaysOutputData": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $('Variáveis').first().json.telefone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        6912,
+        112
+      ],
+      "id": "1696a5d0-3ea2-483f-a49b-72697feb0fd2",
+      "name": "Get a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "GlmkIqsNUExqgact",
+          "name": "Supabase Bistro"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "registrar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "listar_mesas": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancelar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_convertidos1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_interesses1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_etapa1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_convertidos1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_interesse1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPSAAS",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_documentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCPBistro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Supabase4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar sessionID": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Supabase - SaaS Lumi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Redis5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis4": {
+      "main": [
+        [
+          {
+            "node": "Get Memory 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis5": {
+      "main": [
+        [
+          {
+            "node": "Get Memory 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compara Get Memory1": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Memory1": {
+      "main": [
+        [
+          {
+            "node": "Get Memory 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Memory1": {
+      "main": [
+        [
+          {
+            "node": "Get Memory 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields8": {
+      "main": [
+        [
+          {
+            "node": "Compara Get Memory1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Memory 1": {
+      "main": [
+        [
+          {
+            "node": "Aguarda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dados": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variáveis": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados_para_atendimento_humano1": {
+      "main": [
+        [
+          {
+            "node": "Variáveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Audio Memory1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Memory 2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook EVO1": {
+      "main": [
+        [
+          {
+            "node": "Webhook EVO",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook EVO": {
+      "main": [
+        [
+          {
+            "node": "dados_para_atendimento_humano1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase4": {
+      "main": [
+        [
+          {
+            "node": "Gerar sessionID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - SaaS Lumi": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem Completa": {
+      "main": [
+        [
+          {
+            "node": "GET Conhecimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar - Conversas": {
+      "main": [
+        [
+          {
+            "node": "GET Conhecimento2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Deleta Session ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cerebro da IA": {
+      "main": [
+        [
+          {
+            "node": "Conhecimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conhecimento": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "IA Atendente",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "IA Atendente",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA Atendente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator4": {
+      "ai_tool": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Conhecimento": {
+      "main": [
+        [
+          {
+            "node": "IA Atendente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte Base64": {
+      "main": [
+        [
+          {
+            "node": "Converte Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte Audio": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Base64": {
+      "main": [
+        [
+          {
+            "node": "Converte Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte Imagem": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deleta Session ID": {
+      "main": [
+        [
+          {
+            "node": "Update a row2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "mensagemleadAH",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VerificaAtendimentoHumano": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parser  Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OutputParser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Parser  Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser  Chain": {
+      "main": [
+        [
+          {
+            "node": "Split de Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split de Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Evolution API5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Áudio ou Mensagem": {
+      "main": [
+        [
+          {
+            "node": "ElevenLabs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parser  Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ElevenLabs": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguarda": {
+      "main": [
+        [
+          {
+            "node": "Get Memory 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Text Memory1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Memory1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Converte Base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row1": {
+      "main": [
+        [
+          {
+            "node": "Mensagem Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Mensagem Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row2": {
+      "main": [
+        [
+          {
+            "node": "Update a row3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Conhecimento2": {
+      "main": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Atendente": {
+      "main": [
+        [
+          {
+            "node": "Criar - Conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Áudio ou Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Mensagem Humano IA": {
+      "main": [
+        [
+          {
+            "node": "VerificaAtendimentoHumano2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Mensagem Recepcionista": {
+      "main": [
+        [
+          {
+            "node": "Preparar Mensagem Humano IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "VerificaAtendimentoHumano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If10": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VerificaAtendimentoHumano2": {
+      "main": [
+        [
+          {
+            "node": "If10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Getarow9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row1": {
+      "main": [
+        [
+          {
+            "node": "Getarow9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row1": {
+      "main": [
+        [
+          {
+            "node": "If12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If11": {
+      "main": [
+        [
+          {
+            "node": "Get a row1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook EVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If12": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook EVO",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "mensagemleadAH": {
+      "main": [
+        [
+          {
+            "node": "Getarow9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getarow9": {
+      "main": [
+        [
+          {
+            "node": "GET Conhecimento3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If Mensagem Recepcionista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Conhecimento3": {
+      "main": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BISTRO": {
+      "ai_tool": [
+        [
+          {
+            "node": "IA Atendente",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Mensagem Recepcionista1": {
+      "main": [
+        [
+          {
+            "node": "Salvar Mensagem Recepcionista IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Salvar Mensagem Lead Travado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If Mensagem Recepcionista1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAAS1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Cerebro da IA",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch4": {
+      "main": [
+        [
+          {
+            "node": "Enviar presen a",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar presen a1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar presen a2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar presen a3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "46abadf1-01d4-4e90-ab55-56652338da43",
+  "meta": {
+    "instanceId": "71c37f17472b379af220483d9544aebd985ca42d6aba46d245ed6224ce4bef99"
+  },
+  "id": "2Ms_38T-dW-Hf9UjAosZg",
+  "tags": []
+}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getReservaById, updateReserva, deleteReserva } from "@/lib/db/reservas"
 import { updateLeadByTelefone } from "@/lib/db/leads"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 export async function GET(
   request: NextRequest,
@@ -58,6 +59,16 @@ export async function PUT(
 
     const reserva = await updateReserva(String(id), updateData)
 
+    // Registrar auditoria
+    await logAuditoria(
+      'UPDATE',
+      'RESERVAS',
+      `Reserva ${id} atualizada`,
+      String(id),
+      updateData,
+      request
+    )
+
     return NextResponse.json(reserva)
   } catch (error: any) {
     console.error("Erro ao atualizar reserva:", error)
@@ -77,6 +88,17 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    // Registrar auditoria antes de deletar
+    const reservaAntes = await getReservaById(id)
+    await logAuditoria(
+      'DELETE',
+      'RESERVAS',
+      `Reserva deletada: ${reservaAntes?.nome || 'N/A'}`,
+      id,
+      reservaAntes ? { nome: reservaAntes.nome, telefone: reservaAntes.telefone } : undefined,
+      request
+    )
+
     await deleteReserva(id)
     return NextResponse.json({ success: true })
   } catch (error: any) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createReserva, updateReserva } from "@/lib/db/reservas"
 import { updateLeadByTelefone, getLeadByTelefone, createLead } from "@/lib/db/leads"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,6 +92,16 @@ export async function POST(request: NextRequest) {
       contexto: contexto || null,
       etapa: etapa || "reserva_confirmada",
     })
+
+    // Registrar auditoria
+    await logAuditoria(
+      'CREATE',
+      'RESERVAS',
+      `Reserva criada para ${nome} - ${data_reserva} às ${horario_reserva}`,
+      reserva.id,
+      { nome, telefone, data_reserva, horario_reserva, numero_pessoas: numeroPessoas },
+      request
+    )
 
     return NextResponse.json(reserva, { status: 201 })
   } catch (error: any) {

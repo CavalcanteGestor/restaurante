@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { LogOut, User, Bell } from "lucide-react"
+import { LogOut, User } from "lucide-react"
 import { UserWithRole } from "@/lib/auth/user"
 import { Badge } from "@/components/ui/badge"
 import GlobalSearch from "./GlobalSearch"
 import ThemeToggle from "./ThemeToggle"
 import MobileMenu from "./MobileMenu"
+import NotificationsPanel from "./NotificationsPanel"
 
 interface HeaderProps {
   user?: UserWithRole | null
@@ -53,10 +54,7 @@ export default function Header({ user }: HeaderProps) {
           {/* Right Actions */}
           <div className="flex items-center gap-1 md:gap-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" className="relative hover:bg-[#8B2E3D]/10 rounded-xl border-2 border-transparent hover:border-[#8B2E3D]/20">
-              <Bell className="h-4 w-4 md:h-5 md:w-5 text-[#8B2E3D]/70" />
-              <span className="absolute top-1 right-1 h-2 w-2 md:h-2.5 md:w-2.5 bg-[#8B2E3D] rounded-full border-2 border-white shadow-rustic" />
-            </Button>
+            <NotificationsPanel />
             
             {user && (
               <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-br from-white to-[#F5F0E8]/50 border-2 border-[#8B2E3D]/20 shadow-rustic">

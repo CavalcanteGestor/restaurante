@@ -5,6 +5,7 @@ import { updateLeadByTelefone, getLeadByTelefone } from "@/lib/db/leads"
 import { createMensagemAgendada } from "@/lib/db/mensagens-agendadas"
 import { getConfiguracaoMensagem } from "@/lib/db/configuracoes-mensagens"
 import { formatDate } from "@/lib/utils/date"
+import { logAuditoria } from "@/lib/db/auditoria"
 
 /**
  * PATCH /api/reservas/[id]/cancelar
@@ -45,6 +46,16 @@ export async function PATCH(
       etapa: 'cancelado',
       status_comparecimento: 'cancelado',
     })
+
+    // Registrar auditoria
+    await logAuditoria(
+      'CANCEL',
+      'RESERVAS',
+      `Reserva cancelada: ${reserva.nome} - ${reserva.data_reserva} às ${reserva.horario_reserva}`,
+      id,
+      { nome: reserva.nome, telefone: reserva.telefone, data_reserva: reserva.data_reserva },
+      request
+    )
 
     // Atualizar contexto do lead
     const lead = await getLeadByTelefone(reserva.telefone)

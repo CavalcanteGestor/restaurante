@@ -427,6 +427,82 @@ export type Database = {
           updated_at?: string | null
         }
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: 'info' | 'success' | 'warning' | 'error'
+          read: boolean
+          action_url: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type?: 'info' | 'success' | 'warning' | 'error'
+          read?: boolean
+          action_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: 'info' | 'success' | 'warning' | 'error'
+          read?: boolean
+          action_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      auditoria: {
+        Row: {
+          id: string
+          user_id: string | null
+          action: string
+          module: string
+          record_id: string | null
+          description: string | null
+          timestamp: string | null
+          metadata: Json | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          action: string
+          module: string
+          record_id?: string | null
+          description?: string | null
+          timestamp?: string | null
+          metadata?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          action?: string
+          module?: string
+          record_id?: string | null
+          description?: string | null
+          timestamp?: string | null
+          metadata?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string | null
+        }
+      }
     }
   }
 }

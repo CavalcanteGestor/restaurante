@@ -17,6 +17,7 @@ import {
   UserCircle,
   Bot,
   FileUp,
+  FileText,
 } from "lucide-react"
 import { UserRole } from "@/lib/auth/user"
 
@@ -37,6 +38,7 @@ const adminNavigation = [
   { name: "Inteligência Artificial", href: "/automatizacoes/ia", icon: Bot },
   { name: "Documentos", href: "/admin/documentos", icon: FileUp },
   { name: "Usuários", href: "/admin/usuarios", icon: Shield },
+  { name: "Auditoria", href: "/admin/auditoria", icon: FileText },
 ]
 
 // Menu Recepcionista - Ordem lógica: Dashboard, Operacional (Reservas, Mesas), Atendimento (WhatsApp)
