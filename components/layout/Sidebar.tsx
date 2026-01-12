@@ -16,6 +16,7 @@ import {
   Shield,
   UserCircle,
   Bot,
+  FileUp,
 } from "lucide-react"
 import { UserRole } from "@/lib/auth/user"
 
@@ -23,7 +24,7 @@ interface SidebarProps {
   userRole?: UserRole
 }
 
-// Menu Admin - Ordem lógica: Dashboard, Operacional (Reservas, Mesas), Clientes, Atendimento (Leads, WhatsApp), Análise (Relatórios), Configuração (Automatizações, Usuários)
+// Menu Admin - Ordem lógica: Dashboard, Operacional (Reservas, Mesas), Clientes, Atendimento (Leads, WhatsApp), Análise (Relatórios), Configuração (Automatizações, Documentos, Usuários)
 const adminNavigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Reservas", href: "/reservas", icon: Calendar },
@@ -34,6 +35,7 @@ const adminNavigation = [
   { name: "Relatórios", href: "/relatorios", icon: BarChart3 },
   { name: "Automatizações", href: "/automatizacoes", icon: Settings },
   { name: "Inteligência Artificial", href: "/automatizacoes/ia", icon: Bot },
+  { name: "Documentos", href: "/admin/documentos", icon: FileUp },
   { name: "Usuários", href: "/admin/usuarios", icon: Shield },
 ]
 
